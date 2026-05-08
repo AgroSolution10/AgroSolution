@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { colors } from '@/theme/colors';
 import { passo1Schema } from '@/schemas/cadastro/passo1.schema';
+import { maskCpfCnpj } from '@/utils/masks';
 import { Passo1Dados } from './types';
 
 type Passo1ContaProps = {
@@ -17,11 +18,12 @@ type Passo1Erros = Partial<Record<keyof Passo1Dados, string>>;
 export function Passo1Conta({ dados, onNext }: Passo1ContaProps) {
   const [nome, setNome] = useState(dados?.nome ?? '');
   const [email, setEmail] = useState(dados?.email ?? '');
+  const [cpfCnpj, setCpfCnpj] = useState(dados?.cpfCnpj ?? '');
   const [senha, setSenha] = useState(dados?.senha ?? '');
   const [erros, setErros] = useState<Passo1Erros>({});
 
   function continuar() {
-    const resultado = passo1Schema.safeParse({ nome, email, senha });
+    const resultado = passo1Schema.safeParse({ nome, email, cpfCnpj, senha });
 
     if (!resultado.success) {
       setErros(formatarErros(resultado.error));
@@ -56,6 +58,14 @@ export function Passo1Conta({ dados, onNext }: Passo1ContaProps) {
           keyboardType="email-address"
           autoCapitalize="none"
           textContentType="emailAddress"
+        />
+        <Input
+          label="CPF ou CNPJ *"
+          value={cpfCnpj}
+          onChangeText={(t) => setCpfCnpj(maskCpfCnpj(t))}
+          error={erros.cpfCnpj}
+          keyboardType="number-pad"
+          placeholder="000.000.000-00"
         />
         <Input
           label="Senha *"

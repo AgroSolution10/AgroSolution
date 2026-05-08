@@ -4,6 +4,7 @@ export type Passo1Dados = {
   nome: string;
   email: string;
   senha: string;
+  cpfCnpj: string;
 };
 
 export type Passo2Dados = {

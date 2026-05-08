@@ -22,9 +22,11 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erros, setErros] = useState<LoginErrors>({});
+  const [erroGeral, setErroGeral] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function entrar() {
+    setErroGeral(null);
     const resultado = loginSchema.safeParse({ email, senha });
 
     if (!resultado.success) {
@@ -38,6 +40,10 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
     try {
       const usuario = await login(resultado.data);
       onSuccess(usuario);
+    } catch (err) {
+      setErroGeral(
+        err instanceof Error ? err.message : 'Não foi possível entrar. Tente novamente.',
+      );
     } finally {
       setLoading(false);
     }
@@ -69,6 +75,13 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
           textContentType="password"
         />
       </View>
+
+      {erroGeral && (
+        <View style={styles.banner}>
+          <Text style={styles.bannerIcon}>⚠</Text>
+          <Text style={styles.bannerText}>{erroGeral}</Text>
+        </View>
+      )}
 
       <Button title="Entrar" iconRight="→" onPress={entrar} loading={loading} />
     </View>
@@ -102,5 +115,28 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
+  },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: '#FEE9E7',
+    borderLeftWidth: 4,
+    borderLeftColor: colors.danger,
+    borderRadius: 8,
+    padding: 14,
+  },
+  bannerIcon: {
+    color: colors.danger,
+    fontSize: 18,
+    fontWeight: '900',
+    lineHeight: 22,
+  },
+  bannerText: {
+    flex: 1,
+    color: colors.danger,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
   },
 });

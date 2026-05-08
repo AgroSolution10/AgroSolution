@@ -6,6 +6,7 @@
     "apps/*"
   ],
   "scripts": {
+    "dev": "npm --workspace apps/mobile run dev",
     "mobile": "npm --workspace apps/mobile run start"
   }
 }

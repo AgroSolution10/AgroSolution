@@ -34,23 +34,6 @@ export function SidePanel({ compact = false }: SidePanelProps) {
             Monitore clima, produção e commodities em poucos toques.
           </Text>
         </View>
-
-        {!compact && (
-          <View style={styles.stats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>10k+</Text>
-              <Text style={styles.statLabel}>Produtores</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>2M ha</Text>
-              <Text style={styles.statLabel}>Monitorados</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>98%</Text>
-              <Text style={styles.statLabel}>Satisfação</Text>
-            </View>
-          </View>
-        )}
       </View>
     </ImageBackground>
   );
@@ -131,24 +114,5 @@ const styles = StyleSheet.create({
   compactSubtitle: {
     fontSize: 15,
     lineHeight: 21,
-  },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    maxWidth: 620,
-  },
-  statItem: {
-    alignItems: 'center',
-    minWidth: 120,
-    gap: 6,
-  },
-  statValue: {
-    color: colors.surface,
-    fontSize: 26,
-    fontWeight: '900',
-  },
-  statLabel: {
-    color: colors.surface,
-    fontSize: 14,
   },
 });

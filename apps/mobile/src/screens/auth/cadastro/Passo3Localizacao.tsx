@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { Button } from '@/components/Button';
 import { InfoBox } from '@/components/InfoBox';
 import { Input } from '@/components/Input';
+import { MapaLocalizacao } from '@/components/MapaLocalizacao';
 import { colors } from '@/theme/colors';
 import { passo3Schema } from '@/schemas/cadastro/passo3.schema';
 import { Passo3Dados } from './types';
@@ -53,28 +54,24 @@ export function Passo3Localizacao({ dados, onBack, onFinish, loading = false }: 
       />
 
       <View style={styles.form}>
-        <View style={[styles.row, colunaUnica && styles.column]}>
-          <View style={styles.flex}>
-            <Input
-              label="Latitude *"
-              value={latitude}
-              onChangeText={setLatitude}
-              error={erros.latitude}
-              keyboardType="decimal-pad"
-              placeholder="-23.5505"
-            />
-          </View>
-          <View style={styles.flex}>
-            <Input
-              label="Longitude *"
-              value={longitude}
-              onChangeText={setLongitude}
-              error={erros.longitude}
-              keyboardType="decimal-pad"
-              placeholder="-46.6333"
-            />
-          </View>
+        <View style={styles.mapBlock}>
+          <Text style={styles.mapLabel}>Localização da fazenda *</Text>
+          <MapaLocalizacao
+            latitude={latitude}
+            longitude={longitude}
+            onChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+              setErros((atual) => ({ ...atual, latitude: undefined, longitude: undefined }));
+            }}
+          />
+          {(erros.latitude || erros.longitude) && (
+            <Text style={styles.error}>
+              {erros.latitude ?? erros.longitude}
+            </Text>
+          )}
         </View>
+
         <Input
           label="Área total (hectares) *"
           value={areaTotal}
@@ -144,6 +141,19 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  mapBlock: {
+    gap: 8,
+  },
+  mapLabel: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  error: {
+    color: colors.danger,
+    fontSize: 13,
+    fontWeight: '600',
   },
   uploadGroup: {
     gap: 8,
