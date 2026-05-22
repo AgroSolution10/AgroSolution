@@ -8,11 +8,12 @@ type LoginPayload = {
 };
 
 /**
- * Cadastro completo:
- *  1. Cria conta no Supabase Auth (email + senha gerenciados de forma segura).
- *  2. Insere o registro do produtor em `public.usuario`.
- *  3. Cria a fazenda em `public.fazenda`.
- *  4. Vincula o produtor à fazenda em `public.usuario_fazenda` como "owner".
+ * Cadastro completo (só roda após o aceite explícito dos Termos + LGPD):
+ *  1. Valida que o CPF/CNPJ está disponível antes de tocar no Auth.
+ *  2. Cria conta no Supabase Auth com a trilha de consentimento em user_metadata.
+ *  3. Insere o registro do produtor em `public.usuario`.
+ *  4. Cria a fazenda em `public.fazenda`.
+ *  5. Vincula o produtor à fazenda em `public.usuario_fazenda` como "owner".
  */
 export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
   const nome = (dados.nome ?? '').trim();
@@ -24,12 +25,43 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
     throw new Error('Dados de cadastro incompletos.');
   }
 
-  // 1. Cria a conta no Supabase Auth
+  // Trava jurídica (LGPD): sem aceite explícito dos termos e da
+  // política de privacidade não criamos absolutamente nada.
+  if (!dados.aceiteTermos || !dados.aceitePrivacidade) {
+    throw new Error('É preciso aceitar os Termos de Uso e a Política de Privacidade.');
+  }
+
+  // 1. Antes de criar qualquer coisa, checa se o CPF/CNPJ já está em uso.
+  //    Evita criar um auth.users órfão se o INSERT em public.usuario fosse
+  //    falhar mais à frente pela constraint UNIQUE.
+  const { data: disponivel, error: erroCheck } = await supabase.rpc(
+    'cpf_cnpj_disponivel',
+    { p_cpf_cnpj: cpfCnpj },
+  );
+
+  if (erroCheck) {
+    console.error('[cadastro] erro ao checar CPF/CNPJ:', erroCheck);
+    throw new Error(traduzirErro(erroCheck.message));
+  }
+  if (disponivel === false) {
+    throw new Error('Esse CPF/CNPJ já está cadastrado em outra conta.');
+  }
+
+  // 2. Cria a conta no Supabase Auth.
+  //    Guardamos no user_metadata uma trilha mínima do consentimento
+  //    LGPD: data/hora e versão dos termos aceitos.
+  const consentimentoEm = new Date().toISOString();
   const { data: auth, error: erroAuth } = await supabase.auth.signUp({
     email,
     password: senha,
     options: {
-      data: { nome, cpf_cnpj: cpfCnpj },
+      data: {
+        nome,
+        cpf_cnpj: cpfCnpj,
+        aceite_termos_em: consentimentoEm,
+        aceite_privacidade_em: consentimentoEm,
+        aceite_versao: '2026-05-22',
+      },
     },
   });
 
@@ -45,7 +77,7 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
 
   const userId = auth.user.id;
 
-  // 2. Insere o perfil na tabela usuario.
+  // 3. Insere o perfil na tabela usuario.
   //    Edição posterior será feita em uma tela de "Meu perfil" (UPDATE),
   //    não aqui — cadastro só cria.
   const { error: erroUsuario } = await supabase.from('usuario').insert({
@@ -62,7 +94,7 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
     throw new Error(traduzirErro(erroUsuario.message, erroUsuario.details));
   }
 
-  // 3. Cria a fazenda (se temos área e cultura)
+  // 4. Cria a fazenda (se temos área e cultura)
   //    Geramos o UUID no cliente para evitar `INSERT...RETURNING id`, que
   //    dispara a política de SELECT antes do vínculo existir (paradoxo da galinha).
   const culturas = (dados.culturas ?? []) as Cultura[];
@@ -80,7 +112,7 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
 
     if (erroFazenda) throw new Error(traduzirErro(erroFazenda.message));
 
-    // 4. Vincula como dono usando o UUID que já temos
+    // 5. Vincula como dono usando o UUID que já temos
     const { error: erroVinculo } = await supabase.from('usuario_fazenda').insert({
       usuario_id: userId,
       fazenda_id: fazendaId,

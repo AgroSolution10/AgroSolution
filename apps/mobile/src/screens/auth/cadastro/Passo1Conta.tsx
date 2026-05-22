@@ -78,7 +78,9 @@ export function Passo1Conta({ dados, onNext }: Passo1ContaProps) {
       </View>
 
       <Button title="Continuar" iconRight="→" onPress={continuar} />
-      <Text style={styles.terms}>Ao continuar, você concorda com nossos Termos de Uso.</Text>
+      <Text style={styles.terms}>
+        Os Termos de Uso e a Política de Privacidade (LGPD) serão apresentados na última etapa para seu aceite.
+      </Text>
     </View>
   );
 }

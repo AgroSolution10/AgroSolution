@@ -18,7 +18,12 @@ export type Passo3Dados = {
   arquivoTalhoes?: string;
 };
 
-export type CadastroDados = Partial<Passo1Dados & Passo2Dados & Passo3Dados>;
+export type Passo4Dados = {
+  aceiteTermos: boolean;
+  aceitePrivacidade: boolean;
+};
+
+export type CadastroDados = Partial<Passo1Dados & Passo2Dados & Passo3Dados & Passo4Dados>;
 
 export type Usuario = {
   nome: string;

@@ -12,13 +12,12 @@ import { Passo3Dados } from './types';
 type Passo3LocalizacaoProps = {
   dados?: Partial<Passo3Dados>;
   onBack: () => void;
-  onFinish: (dados: Passo3Dados) => void;
-  loading?: boolean;
+  onNext: (dados: Passo3Dados) => void;
 };
 
 type Passo3Erros = Partial<Record<keyof Passo3Dados, string>>;
 
-export function Passo3Localizacao({ dados, onBack, onFinish, loading = false }: Passo3LocalizacaoProps) {
+export function Passo3Localizacao({ dados, onBack, onNext }: Passo3LocalizacaoProps) {
   const [latitude, setLatitude] = useState(dados?.latitude ?? '');
   const [longitude, setLongitude] = useState(dados?.longitude ?? '');
   const [areaTotal, setAreaTotal] = useState(dados?.areaTotal ?? '');
@@ -27,7 +26,7 @@ export function Passo3Localizacao({ dados, onBack, onFinish, loading = false }: 
   const { width } = useWindowDimensions();
   const colunaUnica = width < 520;
 
-  function finalizar() {
+  function continuar() {
     const resultado = passo3Schema.safeParse({ latitude, longitude, areaTotal, arquivoTalhoes });
 
     if (!resultado.success) {
@@ -36,7 +35,7 @@ export function Passo3Localizacao({ dados, onBack, onFinish, loading = false }: 
     }
 
     setErros({});
-    onFinish(resultado.data);
+    onNext(resultado.data);
   }
 
   return (
@@ -97,7 +96,7 @@ export function Passo3Localizacao({ dados, onBack, onFinish, loading = false }: 
 
       <View style={[styles.actions, colunaUnica && styles.column]}>
         <Button title="Voltar" iconLeft="←" variant="secondary" onPress={onBack} style={styles.actionButton} />
-        <Button title="Finalizar" iconRight="✓" onPress={finalizar} loading={loading} style={styles.actionButton} />
+        <Button title="Continuar" iconRight="→" onPress={continuar} style={styles.actionButton} />
       </View>
     </View>
   );

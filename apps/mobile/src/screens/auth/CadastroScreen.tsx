@@ -3,10 +3,18 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Stepper } from '@/components/Stepper';
 import { cadastrarUsuario } from '@/services/auth.service';
 import { colors } from '@/theme/colors';
-import { CadastroDados, Passo1Dados, Passo2Dados, Passo3Dados, Usuario } from './cadastro/types';
+import {
+  CadastroDados,
+  Passo1Dados,
+  Passo2Dados,
+  Passo3Dados,
+  Passo4Dados,
+  Usuario,
+} from './cadastro/types';
 import { Passo1Conta } from './cadastro/Passo1Conta';
 import { Passo2Producao } from './cadastro/Passo2Producao';
 import { Passo3Localizacao } from './cadastro/Passo3Localizacao';
+import { Passo4Termos } from './cadastro/Passo4Termos';
 
 type CadastroScreenProps = {
   onSuccess: (usuario: Usuario) => void;
@@ -30,8 +38,14 @@ export function CadastroScreen({ onSuccess }: CadastroScreenProps) {
     setPasso(3);
   }
 
-  async function finalizar(passo3: Passo3Dados) {
-    const cadastro = { ...dados, ...passo3 };
+  function salvarPasso3(passo3: Passo3Dados) {
+    setErroFinal(null);
+    setDados((atual) => ({ ...atual, ...passo3 }));
+    setPasso(4);
+  }
+
+  async function finalizar(passo4: Passo4Dados) {
+    const cadastro = { ...dados, ...passo4 };
     setDados(cadastro);
     setLoading(true);
     setErroFinal(null);
@@ -50,7 +64,7 @@ export function CadastroScreen({ onSuccess }: CadastroScreenProps) {
 
   return (
     <View style={styles.container}>
-      <Stepper currentStep={passo} />
+      <Stepper currentStep={passo} totalSteps={4} />
 
       {erroFinal && (
         <View style={styles.banner}>
@@ -71,6 +85,13 @@ export function CadastroScreen({ onSuccess }: CadastroScreenProps) {
         <Passo3Localizacao
           dados={dados}
           onBack={() => setPasso(2)}
+          onNext={salvarPasso3}
+        />
+      )}
+      {passo === 4 && (
+        <Passo4Termos
+          dados={dados}
+          onBack={() => setPasso(3)}
           onFinish={finalizar}
           loading={loading}
         />
