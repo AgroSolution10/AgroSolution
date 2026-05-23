@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+<<<<<<< Updated upstream
 <meta charset="UTF-8">
 <title>AgroSolution — Como o projeto está organizado</title>
 <style>
@@ -152,202 +154,516 @@
   }
   .page-break { page-break-before: always; }
 </style>
+=======
+  <meta charset="UTF-8">
+  <title>AgroSolution — Como o projeto está organizado</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #1B1F1A;
+      line-height: 1.55;
+      font-size: 11.5pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      color: #0F5132;
+      font-size: 26pt;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      color: #0F5132;
+      font-size: 16pt;
+      margin: 28px 0 8px 0;
+      border-bottom: 2px solid #0F5132;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      color: #198754;
+      font-size: 13pt;
+      margin: 20px 0 6px 0;
+    }
+
+    h4 {
+      color: #1B1F1A;
+      font-size: 12pt;
+      margin: 14px 0 4px 0;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    .lead {
+      font-size: 13pt;
+      color: #2c3e2a;
+      margin: 8px 0 18px 0;
+    }
+
+    .cover {
+      background-color: #0F5132;
+      color: white;
+      padding: 36px 30px;
+      border-radius: 14px;
+      margin-bottom: 26px;
+      border-bottom: 6px solid #FFC107;
+    }
+
+    .cover h1 {
+      color: white;
+      font-size: 28pt;
+    }
+
+    .cover .sub {
+      color: #d4f1de;
+      font-size: 13pt;
+      margin-top: 10px;
+    }
+
+    .cover .tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10pt;
+      margin-top: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    pre {
+      background: #f4f6f1;
+      border-left: 4px solid #198754;
+      padding: 14px 16px;
+      border-radius: 6px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 10pt;
+      line-height: 1.5;
+      overflow-x: auto;
+      page-break-inside: avoid;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 18px 0;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #0F5132;
+      color: white;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 10.5pt;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e8e0;
+      font-size: 10.5pt;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f9faf6;
+    }
+
+    .pasta {
+      background: #f4f6f1;
+      border-left: 4px solid #198754;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 0 6px 6px 0;
+      page-break-inside: avoid;
+    }
+
+    .pasta .nome {
+      font-family: 'Consolas', monospace;
+      font-weight: bold;
+      color: #0F5132;
+      font-size: 12pt;
+    }
+
+    .pasta .o-que {
+      font-weight: 600;
+      margin: 4px 0;
+    }
+
+    .pasta .ex {
+      color: #5a6055;
+      font-size: 10pt;
+      margin-top: 4px;
+    }
+
+    .ex strong {
+      color: #0F5132;
+    }
+
+    .callout {
+      background: #fff8e1;
+      border-left: 4px solid #FFC107;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+
+    .callout strong {
+      color: #8a6d00;
+    }
+
+    .regra {
+      background: #e8f3ee;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 14px 0;
+    }
+
+    ul {
+      margin: 6px 0;
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 14px;
+      border-top: 1px solid #d9ddd3;
+      color: #6B7269;
+      font-size: 9pt;
+      text-align: center;
+    }
+
+    .emoji {
+      font-size: 14pt;
+      margin-right: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #198754;
+      color: white;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+>>>>>>> Stashed changes
 </head>
+
 <body>
 
-<div class="cover">
-  <h1>AgroSolution</h1>
-  <div class="sub">Como o nosso projeto está organizado nas pastas</div>
-  <div class="tag">Sprint 1 · Cadastro · Login · OTP</div>
-</div>
+  <div class="cover">
+    <h1>AgroSolution</h1>
+    <div class="sub">Como o nosso projeto está organizado nas pastas</div>
+    <div class="tag">Sprint 1 · Cadastro · Login · OTP</div>
+  </div>
 
-<p class="lead">
-  Pessoal, esse documento explica de um jeito simples onde fica cada coisa no nosso projeto.
-  A ideia é que ninguém fique perdido procurando arquivos — quando a gente segue o mesmo padrão,
-  o projeto cresce sem virar bagunça.
-</p>
+  <p class="lead">
+    Pessoal, esse documento explica de um jeito simples onde fica cada coisa no nosso projeto.
+    A ideia é que ninguém fique perdido procurando arquivos — quando a gente segue o mesmo padrão,
+    o projeto cresce sem virar bagunça.
+  </p>
 
-<h2>A imagem geral</h2>
+  <h2>A imagem geral</h2>
 
-<p>Pensa no projeto como um <strong>prédio com 2 apartamentos e um arquivo</strong>:</p>
+  <p>Pensa no projeto como um <strong>prédio com 2 apartamentos e um arquivo</strong>:</p>
 
-<pre>AgroSolution/
+  <pre>AgroSolution/
 ├── apps/
 │   ├── mobile/    ← o app que o produtor instala no celular
 │   └── api/       ← o servidor que conversa com o banco
 └── docs/          ← documentos do projeto (modelagem, schema)</pre>
 
-<table>
-  <tr><th style="width: 28%;">Pasta</th><th>Para que serve</th></tr>
-  <tr>
-    <td><code>apps/mobile/</code></td>
-    <td>O <strong>aplicativo de celular</strong>. É o que o produtor vai baixar e usar. Telas, botões, formulários — tudo aqui.</td>
-  </tr>
-  <tr>
-    <td><code>apps/api/</code></td>
-    <td>O <strong>servidor (cérebro)</strong>. Recebe pedidos do app, valida senha, guarda no banco, envia e-mail. O celular pergunta pra ele "esse e-mail já existe?" e ele responde.</td>
-  </tr>
-  <tr>
-    <td><code>docs/</code></td>
-    <td>Documentos do projeto: modelagem do banco, schema SQL, slides da apresentação.</td>
-  </tr>
-</table>
+  <table>
+    <tr>
+      <th style="width: 28%;">Pasta</th>
+      <th>Para que serve</th>
+    </tr>
+    <tr>
+      <td><code>apps/mobile/</code></td>
+      <td>O <strong>aplicativo de celular</strong>. É o que o produtor vai baixar e usar. Telas, botões, formulários —
+        tudo aqui.</td>
+    </tr>
+    <tr>
+      <td><code>apps/api/</code></td>
+      <td>O <strong>servidor (cérebro)</strong>. Recebe pedidos do app, valida senha, guarda no banco, envia e-mail. O
+        celular pergunta pra ele "esse e-mail já existe?" e ele responde.</td>
+    </tr>
+    <tr>
+      <td><code>docs/</code></td>
+      <td>Documentos do projeto: modelagem do banco, schema SQL, slides da apresentação.</td>
+    </tr>
+  </table>
 
-<div class="callout">
-  <strong>Por que separar em <code>apps/</code>?</strong>
-  Porque o app de celular e o servidor são dois programas diferentes. Cada um tem suas próprias bibliotecas e seu próprio jeito de rodar. Manter eles separados evita confusão.
-</div>
-
-<div class="page-break"></div>
-
-<h2>Dentro do app de celular — <code>apps/mobile/src/</code></h2>
-
-<p>
-  A pasta <code>src</code> (de <em>source</em>, "fonte") é onde mora <strong>todo o código do app</strong>.
-  Dentro dela tem várias pastas, cada uma com um propósito bem específico:
-</p>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">📺</span> screens/</div>
-  <div class="o-que">As telas que o usuário vê.</div>
-  <div>Cada arquivo aqui é uma tela inteira do app. Quando você abre a tela de cadastro no celular, é um arquivo desses sendo exibido.</div>
-  <div class="ex"><strong>Exemplos:</strong> CadastroScreen.tsx, LoginScreen.tsx, OtpScreen.tsx</div>
-</div>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">🧩</span> components/</div>
-  <div class="o-que">Pedacinhos de tela que aparecem em várias telas.</div>
-  <div>Por exemplo: o botão verde do AgroSolution aparece em todas as telas. Em vez de copiar e colar, a gente cria <strong>um</strong> botão aqui e usa em todo lugar. Se um dia mudar a cor, muda em um arquivo só.</div>
-  <div class="ex"><strong>Exemplos:</strong> Button.tsx, Input.tsx, Checkbox.tsx</div>
-</div>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">🗺️</span> navigation/</div>
-  <div class="o-que">O mapa do app.</div>
-  <div>Diz quais telas existem e como o usuário pula de uma pra outra. Por exemplo: depois do cadastro, vai automaticamente pra tela do código de verificação.</div>
-  <div class="ex"><strong>Exemplo:</strong> AppNavigator.tsx</div>
-</div>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">📡</span> services/</div>
-  <div class="o-que">Quem fala com o servidor.</div>
-  <div>Tudo que precisa pedir ou mandar dado para a API passa por aqui. É como o "carteiro" do app — ele leva o cadastro do usuário e traz a resposta.</div>
-  <div class="ex"><strong>Exemplos:</strong> api.ts (configuração do carteiro), auth.service.ts (função cadastrar, login)</div>
-</div>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">✅</span> schemas/</div>
-  <div class="o-que">Regras de validação dos formulários.</div>
-  <div>Aqui ficam regras como "o nome precisa ter pelo menos 2 letras", "o e-mail precisa ter @", "a senha precisa ter número e letra". Ficam em um lugar separado para a gente reaproveitar e testar.</div>
-  <div class="ex"><strong>Exemplo:</strong> cadastro.schema.ts</div>
-</div>
-
-<div class="pasta">
-  <div class="nome"><span class="emoji">🔧</span> utils/</div>
-  <div class="o-que">Ferramentas pequenas que fazem uma coisa só.</div>
-  <div>Funções soltas que ajudam em coisas pontuais. Não desenham nada na tela.</div>
-  <div class="ex">
-    <strong>Exemplos:</strong>
-    <ul>
-      <li><strong>masks.ts</strong> — coloca a pontuação no CPF enquanto a pessoa digita (000.000.000-00)</li>
-      <li><strong>validators.ts</strong> — confere se um CPF é de verdade ou se a pessoa só digitou números aleatórios</li>
-    </ul>
+  <div class="callout">
+    <strong>Por que separar em <code>apps/</code>?</strong>
+    Porque o app de celular e o servidor são dois programas diferentes. Cada um tem suas próprias bibliotecas e seu
+    próprio jeito de rodar. Manter eles separados evita confusão.
   </div>
-</div>
 
-<div class="pasta">
-  <div class="nome"><span class="emoji">🎨</span> theme/</div>
-  <div class="o-que">A identidade visual do app.</div>
-  <div>Cores, tamanhos de letra, espaçamentos. Em vez de espalhar o verde do AgroSolution (#0F5132) pelo código, a gente coloca em um lugar só. Se um dia mudar a marca, muda aqui — e o app inteiro acompanha.</div>
-  <div class="ex"><strong>Exemplos:</strong> colors.ts, typography.ts</div>
-</div>
+  <div class="page-break"></div>
 
-<div class="pasta">
-  <div class="nome"><span class="emoji">🎣</span> hooks/</div>
-  <div class="o-que">Lógica que se repete em várias telas.</div>
-  <div>Por exemplo: "esse usuário está logado?". Em vez de checar isso dentro de cada tela, a gente cria um <em>hook</em> que toda tela pode usar.</div>
-  <div class="ex"><strong>Exemplo:</strong> useAuth.ts</div>
-</div>
+  <h2>Dentro do app de celular — <code>apps/mobile/src/</code></h2>
 
-<div class="pasta">
-  <div class="nome"><span class="emoji">🖼️</span> assets/</div>
-  <div class="o-que">Imagens, ícones e logos.</div>
-  <div>Ícone do app, splash screen (a tela que aparece enquanto o app carrega), ilustrações usadas dentro das telas.</div>
-</div>
+  <p>
+    A pasta <code>src</code> (de <em>source</em>, "fonte") é onde mora <strong>todo o código do app</strong>.
+    Dentro dela tem várias pastas, cada uma com um propósito bem específico:
+  </p>
 
-<div class="page-break"></div>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">📺</span> screens/</div>
+    <div class="o-que">As telas que o usuário vê.</div>
+    <div>Cada arquivo aqui é uma tela inteira do app. Quando você abre a tela de cadastro no celular, é um arquivo
+      desses sendo exibido.</div>
+    <div class="ex"><strong>Exemplos:</strong> CadastroScreen.tsx, LoginScreen.tsx, OtpScreen.tsx</div>
+  </div>
 
-<h2>Dentro do servidor — <code>apps/api/</code></h2>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🧩</span> components/</div>
+    <div class="o-que">Pedacinhos de tela que aparecem em várias telas.</div>
+    <div>Por exemplo: o botão verde do AgroSolution aparece em todas as telas. Em vez de copiar e colar, a gente cria
+      <strong>um</strong> botão aqui e usa em todo lugar. Se um dia mudar a cor, muda em um arquivo só.
+    </div>
+    <div class="ex"><strong>Exemplos:</strong> Button.tsx, Input.tsx, Checkbox.tsx</div>
+  </div>
 
-<p>Quem ficar com a API vai mexer aqui. A pasta tem:</p>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🗺️</span> navigation/</div>
+    <div class="o-que">O mapa do app.</div>
+    <div>Diz quais telas existem e como o usuário pula de uma pra outra. Por exemplo: depois do cadastro, vai
+      automaticamente pra tela do código de verificação.</div>
+    <div class="ex"><strong>Exemplo:</strong> AppNavigator.tsx</div>
+  </div>
 
-<table>
-  <tr><th style="width: 28%;">Pasta</th><th>Para que serve</th></tr>
-  <tr>
-    <td><code>src/</code></td>
-    <td>O código do servidor. Onde ficam as rotas (<code>/cadastro</code>, <code>/login</code>), os controles de senha, os envios de e-mail.</td>
-  </tr>
-  <tr>
-    <td><code>migrations/</code></td>
-    <td>Arquivos SQL que criam ou alteram tabelas no banco. Toda mudança no banco vira um arquivo aqui — assim qualquer pessoa do time consegue subir o banco do zero, igualzinho.</td>
-  </tr>
-</table>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">📡</span> services/</div>
+    <div class="o-que">Quem fala com o servidor.</div>
+    <div>Tudo que precisa pedir ou mandar dado para a API passa por aqui. É como o "carteiro" do app — ele leva o
+      cadastro do usuário e traz a resposta.</div>
+    <div class="ex"><strong>Exemplos:</strong> api.ts (configuração do carteiro), auth.service.ts (função cadastrar,
+      login)</div>
+  </div>
 
-<h3>O banco já tem essas tabelas:</h3>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">✅</span> schemas/</div>
+    <div class="o-que">Regras de validação dos formulários.</div>
+    <div>Aqui ficam regras como "o nome precisa ter pelo menos 2 letras", "o e-mail precisa ter @", "a senha precisa ter
+      número e letra". Ficam em um lugar separado para a gente reaproveitar e testar.</div>
+    <div class="ex"><strong>Exemplo:</strong> cadastro.schema.ts</div>
+  </div>
 
-<table>
-  <tr><th style="width: 32%;">Tabela</th><th>O que guarda</th></tr>
-  <tr><td><code>usuario</code></td><td>Quem usa o app — nome, e-mail, senha (criptografada), CPF/CNPJ.</td></tr>
-  <tr><td><code>dispositivo</code></td><td>O celular do usuário — pra mandar notificações e controlar logins.</td></tr>
-  <tr><td><code>sessao</code></td><td>Cada vez que alguém faz login, gera uma sessão aqui (pra poder deslogar depois).</td></tr>
-  <tr><td><code>fazenda</code></td><td>Cada fazenda cadastrada — nome, área em hectares, cultura, município, UF.</td></tr>
-  <tr><td><code>usuario_fazenda</code></td><td>Liga usuário com fazenda. Diz quem é dono, quem é gerente, quem é contador.</td></tr>
-</table>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🔧</span> utils/</div>
+    <div class="o-que">Ferramentas pequenas que fazem uma coisa só.</div>
+    <div>Funções soltas que ajudam em coisas pontuais. Não desenham nada na tela.</div>
+    <div class="ex">
+      <strong>Exemplos:</strong>
+      <ul>
+        <li><strong>masks.ts</strong> — coloca a pontuação no CPF enquanto a pessoa digita (000.000.000-00)</li>
+        <li><strong>validators.ts</strong> — confere se um CPF é de verdade ou se a pessoa só digitou números aleatórios
+        </li>
+      </ul>
+    </div>
+  </div>
 
-<h2>Regra de bolso: onde colocar uma coisa nova?</h2>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🎨</span> theme/</div>
+    <div class="o-que">A identidade visual do app.</div>
+    <div>Cores, tamanhos de letra, espaçamentos. Em vez de espalhar o verde do AgroSolution (#0F5132) pelo código, a
+      gente coloca em um lugar só. Se um dia mudar a marca, muda aqui — e o app inteiro acompanha.</div>
+    <div class="ex"><strong>Exemplos:</strong> colors.ts, typography.ts</div>
+  </div>
 
-<p>Se você está com um arquivo na mão e não sabe onde colocar, faz essas perguntas:</p>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🎣</span> hooks/</div>
+    <div class="o-que">Lógica que se repete em várias telas.</div>
+    <div>Por exemplo: "esse usuário está logado?". Em vez de checar isso dentro de cada tela, a gente cria um
+      <em>hook</em> que toda tela pode usar.
+    </div>
+    <div class="ex"><strong>Exemplo:</strong> useAuth.ts</div>
+  </div>
 
-<table>
-  <tr><th>Pergunta</th><th>Vai pra…</th></tr>
-  <tr><td>É uma <strong>tela inteira</strong>?</td><td><code>screens/</code></td></tr>
-  <tr><td>Aparece em <strong>mais de uma tela</strong>?</td><td><code>components/</code></td></tr>
-  <tr><td>Faz uma <strong>conta ou formata texto</strong> (sem desenhar nada)?</td><td><code>utils/</code></td></tr>
-  <tr><td>Conversa com a <strong>API / servidor</strong>?</td><td><code>services/</code></td></tr>
-  <tr><td>É uma <strong>regra de validação</strong> de formulário?</td><td><code>schemas/</code></td></tr>
-  <tr><td>É uma <strong>cor, fonte ou espaçamento</strong>?</td><td><code>theme/</code></td></tr>
-  <tr><td>É uma <strong>lógica reutilizável</strong> (ex: "está logado?")?</td><td><code>hooks/</code></td></tr>
-  <tr><td>É uma <strong>imagem ou ícone</strong>?</td><td><code>assets/</code></td></tr>
-</table>
+  <div class="pasta">
+    <div class="nome"><span class="emoji">🖼️</span> assets/</div>
+    <div class="o-que">Imagens, ícones e logos.</div>
+    <div>Ícone do app, splash screen (a tela que aparece enquanto o app carrega), ilustrações usadas dentro das telas.
+    </div>
+  </div>
 
-<h2>Combinados do time</h2>
+  <div class="page-break"></div>
 
-<div class="regra">
-  <p><strong>1. Sempre criar arquivo na pasta certa.</strong> Se ficar em dúvida, pergunta no grupo antes de criar.</p>
+  <h2>Dentro do servidor — <code>apps/api/</code></h2>
 
-  <p><strong>2. Não copiar e colar código.</strong> Se você vai usar o mesmo trecho em duas telas, ele vira um <em>component</em>, uma <em>util</em> ou um <em>hook</em>.</p>
+  <p>Quem ficar com a API vai mexer aqui. A pasta tem:</p>
 
-  <p><strong>3. Cores e tamanhos sempre vêm do <code>theme/</code>.</strong> Nunca digitar <code>#0F5132</code> direto na tela — usa o nome (<code>colors.primary</code>).</p>
+  <table>
+    <tr>
+      <th style="width: 28%;">Pasta</th>
+      <th>Para que serve</th>
+    </tr>
+    <tr>
+      <td><code>src/</code></td>
+      <td>O código do servidor. Onde ficam as rotas (<code>/cadastro</code>, <code>/login</code>), os controles de
+        senha, os envios de e-mail.</td>
+    </tr>
+    <tr>
+      <td><code>migrations/</code></td>
+      <td>Arquivos SQL que criam ou alteram tabelas no banco. Toda mudança no banco vira um arquivo aqui — assim
+        qualquer pessoa do time consegue subir o banco do zero, igualzinho.</td>
+    </tr>
+  </table>
 
-  <p><strong>4. Validação de formulário sempre com Zod, em <code>schemas/</code>.</strong> Não validar na mão dentro da tela.</p>
+  <h3>O banco já tem essas tabelas:</h3>
 
-  <p><strong>5. Importação curta com <code>@/</code>.</strong> Use <code>import &#123; Input &#125; from '@/components/Input'</code> em vez de <code>'../../../components/Input'</code>.</p>
-</div>
+  <table>
+    <tr>
+      <th style="width: 32%;">Tabela</th>
+      <th>O que guarda</th>
+    </tr>
+    <tr>
+      <td><code>usuario</code></td>
+      <td>Quem usa o app — nome, e-mail, senha (criptografada), CPF/CNPJ.</td>
+    </tr>
+    <tr>
+      <td><code>dispositivo</code></td>
+      <td>O celular do usuário — pra mandar notificações e controlar logins.</td>
+    </tr>
+    <tr>
+      <td><code>sessao</code></td>
+      <td>Cada vez que alguém faz login, gera uma sessão aqui (pra poder deslogar depois).</td>
+    </tr>
+    <tr>
+      <td><code>fazenda</code></td>
+      <td>Cada fazenda cadastrada — nome, área em hectares, cultura, município, UF.</td>
+    </tr>
+    <tr>
+      <td><code>usuario_fazenda</code></td>
+      <td>Liga usuário com fazenda. Diz quem é dono, quem é gerente, quem é contador.</td>
+    </tr>
+  </table>
 
-<h2>Quem está com o quê</h2>
+  <h2>Regra de bolso: onde colocar uma coisa nova?</h2>
 
-<table>
-  <tr><th>Tela / parte</th><th>Responsável</th></tr>
-  <tr><td>Tela de Cadastro</td><td><strong>Alana</strong></td></tr>
-  <tr><td>Tela de Login</td><td>a definir</td></tr>
-  <tr><td>Tela de OTP (código por e-mail)</td><td>a definir</td></tr>
-  <tr><td>API (servidor)</td><td>a definir</td></tr>
-  <tr><td>Schema do banco</td><td>já feito ✅</td></tr>
-</table>
+  <p>Se você está com um arquivo na mão e não sabe onde colocar, faz essas perguntas:</p>
 
-<div class="footer">
-  AgroSolution · Documento interno do time · Sprint 1
-</div>
+  <table>
+    <tr>
+      <th>Pergunta</th>
+      <th>Vai pra…</th>
+    </tr>
+    <tr>
+      <td>É uma <strong>tela inteira</strong>?</td>
+      <td><code>screens/</code></td>
+    </tr>
+    <tr>
+      <td>Aparece em <strong>mais de uma tela</strong>?</td>
+      <td><code>components/</code></td>
+    </tr>
+    <tr>
+      <td>Faz uma <strong>conta ou formata texto</strong> (sem desenhar nada)?</td>
+      <td><code>utils/</code></td>
+    </tr>
+    <tr>
+      <td>Conversa com a <strong>API / servidor</strong>?</td>
+      <td><code>services/</code></td>
+    </tr>
+    <tr>
+      <td>É uma <strong>regra de validação</strong> de formulário?</td>
+      <td><code>schemas/</code></td>
+    </tr>
+    <tr>
+      <td>É uma <strong>cor, fonte ou espaçamento</strong>?</td>
+      <td><code>theme/</code></td>
+    </tr>
+    <tr>
+      <td>É uma <strong>lógica reutilizável</strong> (ex: "está logado?")?</td>
+      <td><code>hooks/</code></td>
+    </tr>
+    <tr>
+      <td>É uma <strong>imagem ou ícone</strong>?</td>
+      <td><code>assets/</code></td>
+    </tr>
+  </table>
+
+  <h2>Combinados do time</h2>
+
+  <div class="regra">
+    <p><strong>1. Sempre criar arquivo na pasta certa.</strong> Se ficar em dúvida, pergunta no grupo antes de criar.
+    </p>
+
+    <p><strong>2. Não copiar e colar código.</strong> Se você vai usar o mesmo trecho em duas telas, ele vira um
+      <em>component</em>, uma <em>util</em> ou um <em>hook</em>.
+    </p>
+
+    <p><strong>3. Cores e tamanhos sempre vêm do <code>theme/</code>.</strong> Nunca digitar <code>#0F5132</code> direto
+      na tela — usa o nome (<code>colors.primary</code>).</p>
+
+    <p><strong>4. Validação de formulário sempre com Zod, em <code>schemas/</code>.</strong> Não validar na mão dentro
+      da tela.</p>
+
+    <p><strong>5. Importação curta com <code>@/</code>.</strong> Use
+      <code>import &#123; Input &#125; from '@/components/Input'</code> em vez de
+      <code>'../../../components/Input'</code>.
+    </p>
+  </div>
+
+  <h2>Quem está com o quê</h2>
+
+  <table>
+    <tr>
+      <th>Tela / parte</th>
+      <th>Responsável</th>
+    </tr>
+    <tr>
+      <td>Tela de Cadastro</td>
+      <td><strong>Alana</strong></td>
+    </tr>
+    <tr>
+      <td>Tela de Login</td>
+      <td>a definir</td>
+    </tr>
+    <tr>
+      <td>Tela de OTP (código por e-mail)</td>
+      <td>a definir</td>
+    </tr>
+    <tr>
+      <td>API (servidor)</td>
+      <td>a definir</td>
+    </tr>
+    <tr>
+      <td>Schema do banco</td>
+      <td>já feito ✅</td>
+    </tr>
+  </table>
+
+  <div class="footer">
+    AgroSolution · Documento interno do time · Sprint 1
+  </div>
 
 </body>
+
 </html>
