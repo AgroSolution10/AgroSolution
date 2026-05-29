@@ -7,11 +7,15 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { AlertasList } from '@/components/AlertasList';
+import { EvolucaoFinanceira } from '@/components/EvolucaoFinanceira';
 import { FinanceiroResumo } from '@/components/FinanceiroResumo';
+import { FiltrosPeriodo, type Periodo } from '@/components/FiltrosPeriodo';
+import { ProjecaoCaixa } from '@/components/ProjecaoCaixa';
 import { RadarCommodities } from '@/components/RadarCommodities';
 import { Sidebar, type MenuItemId } from '@/components/Sidebar';
-import { colors } from '@/theme/colors';
+import { colors, radius, shadows } from '@/theme/colors';
 import { Usuario } from '@/screens/auth/cadastro/types';
 
 type DashboardScreenProps = {
@@ -22,6 +26,7 @@ type DashboardScreenProps = {
 export function DashboardScreen({ usuario, onLogout }: DashboardScreenProps) {
   const [paginaAtiva, setPaginaAtiva] = useState<MenuItemId>('dashboard');
   const [menuAberto, setMenuAberto] = useState(false);
+  const [periodo, setPeriodo] = useState<Periodo>('mes');
   const { width } = useWindowDimensions();
   const desktop = width >= 1024;
 
@@ -49,7 +54,7 @@ export function DashboardScreen({ usuario, onLogout }: DashboardScreenProps) {
               style={({ pressed }) => [styles.menuBtn, pressed && styles.menuBtnPressed]}
               accessibilityLabel="Abrir menu"
             >
-              <Text style={styles.menuBtnIcon}>≡</Text>
+              <Feather name="menu" size={20} color={colors.surface} />
               <Text style={styles.menuBtnText}>Menu</Text>
             </Pressable>
             <Text style={styles.brand}>AgroSolution</Text>
@@ -70,6 +75,8 @@ export function DashboardScreen({ usuario, onLogout }: DashboardScreenProps) {
             </Text>
           </View>
 
+          <FiltrosPeriodo valor={periodo} onChange={setPeriodo} />
+
           <RadarCommodities />
 
           <View style={styles.colunas}>
@@ -78,6 +85,15 @@ export function DashboardScreen({ usuario, onLogout }: DashboardScreenProps) {
             </View>
             <View style={styles.coluna}>
               <FinanceiroResumo />
+            </View>
+          </View>
+
+          <View style={styles.colunas}>
+            <View style={styles.coluna}>
+              <EvolucaoFinanceira />
+            </View>
+            <View style={styles.coluna}>
+              <ProjecaoCaixa />
             </View>
           </View>
 
@@ -152,12 +168,6 @@ const styles = StyleSheet.create({
   menuBtnPressed: {
     backgroundColor: 'rgba(255,255,255,0.25)',
   },
-  menuBtnIcon: {
-    color: colors.surface,
-    fontSize: 22,
-    fontWeight: '900',
-    lineHeight: 22,
-  },
   menuBtnText: {
     color: colors.surface,
     fontWeight: '700',
@@ -169,22 +179,23 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   scroll: {
-    padding: 24,
-    gap: 18,
-    paddingBottom: 60,
+    padding: 28,
+    gap: 22,
+    paddingBottom: 64,
   },
   scrollMobile: {
-    padding: 14,
-    gap: 14,
+    padding: 16,
+    gap: 16,
     paddingBottom: 40,
   },
   topbar: {
     gap: 4,
+    marginBottom: 2,
   },
   ola: {
     color: colors.text,
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   olaMobile: {
     fontSize: 22,
@@ -215,7 +226,7 @@ const styles = StyleSheet.create({
   },
   colunas: {
     flexDirection: 'row',
-    gap: 18,
+    gap: 22,
     flexWrap: 'wrap',
   },
   coluna: {
@@ -224,12 +235,13 @@ const styles = StyleSheet.create({
   },
   acaoBox: {
     backgroundColor: colors.primary,
-    padding: 22,
-    borderRadius: 12,
+    padding: 24,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
     flexWrap: 'wrap',
+    ...shadows.card,
   },
   acaoTexto: {
     flex: 1,
@@ -239,7 +251,7 @@ const styles = StyleSheet.create({
   acaoTitulo: {
     color: colors.surface,
     fontSize: 17,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   acaoDescricao: {
     color: 'rgba(255,255,255,0.85)',
@@ -250,7 +262,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
   acaoBtnPressed: {
     opacity: 0.85,

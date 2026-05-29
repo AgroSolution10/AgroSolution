@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/theme/colors';
+import { colors, radius, shadows } from '@/theme/colors';
 
 export function FinanceiroResumo() {
   return (
@@ -41,11 +41,10 @@ function Linha({ label, valor, cor }: { label: string; valor: string; cor: strin
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: 24,
     gap: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
+    ...shadows.card,
   },
   header: {
     flexDirection: 'row',
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
   title: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   periodo: {
     color: colors.textMuted,
@@ -64,8 +63,8 @@ const styles = StyleSheet.create({
   },
   principal: {
     backgroundColor: colors.primary,
-    padding: 18,
-    borderRadius: 10,
+    padding: 20,
+    borderRadius: radius.md,
     gap: 4,
   },
   principalLabel: {
@@ -76,7 +75,7 @@ const styles = StyleSheet.create({
   principalValor: {
     color: colors.surface,
     fontSize: 28,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   variacao: {
     flexDirection: 'row',
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
   variacaoText: {
     color: colors.accent,
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   variacaoSub: {
     color: 'rgba(255,255,255,0.7)',
@@ -101,7 +100,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     backgroundColor: colors.surfaceSoft,
-    borderRadius: 8,
+    borderRadius: radius.md,
     gap: 4,
   },
   linhaTopo: {
@@ -122,6 +121,6 @@ const styles = StyleSheet.create({
   linhaValor: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '800',
   },
 });

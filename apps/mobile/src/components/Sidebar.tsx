@@ -1,5 +1,8 @@
+import { Feather } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
+
+type FeatherName = keyof typeof Feather.glyphMap;
 
 export type MenuItemId =
   | 'dashboard'
@@ -13,18 +16,18 @@ export type MenuItemId =
 type MenuItem = {
   id: MenuItemId;
   label: string;
-  icon: string;
+  icon: FeatherName;
   badge?: number;
 };
 
 const ITENS: MenuItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '◈' },
-  { id: 'radar', label: 'Radar de Mercado', icon: '◎' },
-  { id: 'alertas', label: 'Alertas', icon: '!', badge: 3 },
-  { id: 'financeiro', label: 'Financeiro', icon: '$' },
-  { id: 'talhoes', label: 'Talhões', icon: '⌖' },
-  { id: 'voz', label: 'Comando de Voz', icon: '◌' },
-  { id: 'configuracoes', label: 'Configurações', icon: '⚙' },
+  { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+  { id: 'radar', label: 'Radar de Mercado', icon: 'trending-up' },
+  { id: 'alertas', label: 'Alertas', icon: 'bell', badge: 3 },
+  { id: 'financeiro', label: 'Financeiro', icon: 'dollar-sign' },
+  { id: 'talhoes', label: 'Talhões', icon: 'map' },
+  { id: 'voz', label: 'Comando de Voz', icon: 'mic' },
+  { id: 'configuracoes', label: 'Configurações', icon: 'settings' },
 ];
 
 type SidebarProps = {
@@ -41,7 +44,7 @@ export function Sidebar({ ativo, onSelecionar, onSair, usuario, onFechar }: Side
     <View style={styles.container}>
       <View style={styles.brand}>
         <View style={styles.logoMark}>
-          <Text style={styles.logoSymbol}>✓</Text>
+          <Feather name="check" size={16} color={colors.surface} />
         </View>
         <Text style={styles.brandName}>AgroSolution</Text>
         {onFechar && (
@@ -69,7 +72,12 @@ export function Sidebar({ ativo, onSelecionar, onSair, usuario, onFechar }: Side
                 pressed && !ativoFlag && styles.itemPressed,
               ]}
             >
-              <Text style={[styles.icon, ativoFlag && styles.iconAtivo]}>{item.icon}</Text>
+              <Feather
+                name={item.icon}
+                size={18}
+                color={ativoFlag ? colors.accent : 'rgba(255,255,255,0.7)'}
+                style={styles.icon}
+              />
               <Text style={[styles.label, ativoFlag && styles.labelAtivo]}>{item.label}</Text>
               {item.badge ? (
                 <View style={styles.badge}>
@@ -143,11 +151,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoSymbol: {
-    color: colors.surface,
-    fontSize: 16,
-    fontWeight: '900',
-  },
   brandName: {
     color: colors.surface,
     fontSize: 19,
@@ -172,13 +175,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   icon: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 18,
     width: 22,
     textAlign: 'center',
-  },
-  iconAtivo: {
-    color: colors.accent,
   },
   label: {
     color: 'rgba(255,255,255,0.85)',

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/theme/colors';
+import { colors, radius, shadows } from '@/theme/colors';
 
 type Commodity = {
   nome: string;
@@ -48,11 +48,15 @@ function CardCommodity({ nome, unidade, preco, variacao, cor }: Commodity) {
     <View style={styles.card}>
       <View style={styles.cardTop}>
         <View style={[styles.iconePequeno, { backgroundColor: cor }]} />
-        <Text style={styles.nome}>{nome}</Text>
+        <Text style={styles.nome} numberOfLines={1}>
+          {nome}
+        </Text>
       </View>
       <Text style={styles.preco}>{formatBrl(preco)}</Text>
-      <Text style={styles.unidade}>{unidade}</Text>
-      <View style={[styles.variacao, subindo ? styles.variacaoUp : styles.variacaoDown]}>
+      <View style={styles.rodape}>
+        <Text style={styles.unidade} numberOfLines={1}>
+          {unidade}
+        </Text>
         <Text style={[styles.variacaoText, subindo ? styles.variacaoUpText : styles.variacaoDownText]}>
           {subindo ? '▲' : '▼'} {Math.abs(variacao).toFixed(1)}%
         </Text>
@@ -72,11 +76,10 @@ function formatBrl(valor: number) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: 24,
-    gap: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
+    gap: 20,
+    ...shadows.card,
   },
   header: {
     flexDirection: 'row',
@@ -86,8 +89,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: 20,
+    fontWeight: '800',
   },
   subtitle: {
     color: colors.textMuted,
@@ -98,10 +101,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#FEE9E7',
+    backgroundColor: colors.dangerSoft,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 14,
+    borderRadius: radius.pill,
   },
   dot: {
     width: 8,
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
   aoVivoText: {
     color: colors.danger,
     fontSize: 11,
-    fontWeight: '900',
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
   grid: {
@@ -123,53 +126,48 @@ const styles = StyleSheet.create({
   card: {
     flexGrow: 1,
     flexBasis: 180,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: 14,
-    gap: 4,
+    borderRadius: radius.md,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     backgroundColor: colors.surfaceSoft,
   },
   cardTop: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 4,
+    marginBottom: 12,
   },
   iconePequeno: {
-    width: 18,
-    height: 18,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.border,
+    width: 22,
+    height: 22,
+    borderRadius: radius.sm,
   },
   nome: {
     color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
+    flex: 1,
   },
   preco: {
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '900',
-    marginTop: 2,
+    fontSize: 21,
+    fontWeight: '800',
+  },
+  rodape: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 6,
   },
   unidade: {
     color: colors.textSoft,
     fontSize: 11,
-    marginBottom: 6,
+    flexShrink: 1,
   },
-  variacao: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  variacaoUp: { backgroundColor: '#E6F4EC' },
-  variacaoDown: { backgroundColor: '#FEE9E7' },
   variacaoText: {
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   variacaoUpText: { color: colors.success },
   variacaoDownText: { color: colors.danger },

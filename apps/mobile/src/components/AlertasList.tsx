@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/theme/colors';
+import { colors, radius, shadows } from '@/theme/colors';
 
 type TipoAlerta = 'sucesso' | 'aviso' | 'critico';
 
@@ -32,9 +32,9 @@ const ALERTAS: Alerta[] = [
 ];
 
 const CORES_FUNDO: Record<TipoAlerta, string> = {
-  sucesso: '#E6F4EC',
-  aviso: '#FFF8E1',
-  critico: '#FEE9E7',
+  sucesso: colors.successSoft,
+  aviso: colors.warningSoft,
+  critico: colors.dangerSoft,
 };
 
 const CORES_BORDA: Record<TipoAlerta, string> = {
@@ -82,11 +82,10 @@ function ItemAlerta({ tipo, titulo, texto, quando }: Alerta) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: 24,
-    gap: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
+    gap: 16,
+    ...shadows.card,
   },
   header: {
     flexDirection: 'row',
@@ -96,21 +95,21 @@ const styles = StyleSheet.create({
   title: {
     color: colors.text,
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   contador: {
-    backgroundColor: colors.primary,
-    minWidth: 28,
+    backgroundColor: colors.primarySoft,
+    minWidth: 26,
     height: 24,
-    borderRadius: 12,
+    borderRadius: radius.pill,
     paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   contadorText: {
-    color: colors.surface,
+    color: colors.primary,
     fontSize: 13,
-    fontWeight: '900',
+    fontWeight: '800',
   },
   lista: {
     gap: 10,
@@ -119,23 +118,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 14,
-    borderRadius: 10,
-    borderLeftWidth: 4,
+    borderRadius: radius.md,
+    borderLeftWidth: 3,
   },
   bullet: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginTop: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 5,
   },
   itemContent: {
     flex: 1,
-    gap: 2,
+    gap: 3,
   },
   itemTitle: {
     color: colors.text,
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   itemText: {
     color: colors.textMuted,
