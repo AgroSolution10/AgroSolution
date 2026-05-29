@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getSupabaseClient } from './supabase';
 import { onlyDigits } from '@/utils/masks';
 import type { CadastroDados, Cultura, Usuario } from '@/screens/auth/cadastro/types';
 
@@ -16,6 +16,7 @@ type LoginPayload = {
  *  5. Vincula o produtor à fazenda em `public.usuario_fazenda` como "owner".
  */
 export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
+  const supabase = getSupabaseClient();
   const nome = (dados.nome ?? '').trim();
   const email = (dados.email ?? '').trim().toLowerCase();
   const senha = dados.senha ?? '';
@@ -133,6 +134,7 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
  * Login com e-mail e senha. Devolve dados do usuário + 1ª fazenda associada.
  */
 export async function login({ email, senha }: LoginPayload): Promise<Usuario> {
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password: senha,
@@ -146,11 +148,13 @@ export async function login({ email, senha }: LoginPayload): Promise<Usuario> {
 
 /** Encerra a sessão atual no Supabase. */
 export async function logout(): Promise<void> {
+  const supabase = getSupabaseClient();
   await supabase.auth.signOut();
 }
 
 /** Verifica se há sessão ativa e devolve os dados do usuário (ou null). */
 export async function getSessao(): Promise<Usuario | null> {
+  const supabase = getSupabaseClient();
   const { data } = await supabase.auth.getSession();
   if (!data.session?.user) return null;
   try {
@@ -161,6 +165,7 @@ export async function getSessao(): Promise<Usuario | null> {
 }
 
 async function carregarUsuario(userId: string): Promise<Usuario> {
+  const supabase = getSupabaseClient();
   const { data: usuario, error } = await supabase
     .from('usuario')
     .select('nome, email')

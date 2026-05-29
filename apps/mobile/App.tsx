@@ -18,7 +18,7 @@ import { LoginScreen } from '@/screens/auth/LoginScreen';
 import { DashboardScreen } from '@/screens/dashboard/DashboardScreen';
 import { Usuario } from '@/screens/auth/cadastro/types';
 import { getSessao, logout } from '@/services/auth.service';
-import { supabase } from '@/services/supabase';
+import { isSupabaseConfigured, supabase, supabaseConfigError } from '@/services/supabase';
 
 type AuthMode = 'cadastro' | 'login';
 
@@ -31,6 +31,11 @@ export default function App() {
   const isDesktop = width >= 900;
 
   useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setCarregandoSessao(false);
+      return;
+    }
+
     // Tenta restaurar sessão guardada (depois de F5, fechar/abrir aba, etc.)
     getSessao()
       .then((u) => setUsuario(u))
@@ -73,6 +78,10 @@ export default function App() {
     );
   }
 
+  if (!isSupabaseConfigured) {
+    return <ConfigMissingScreen />;
+  }
+
   if (usuario) {
     return (
       <View style={{ flex: 1 }}>
@@ -112,6 +121,27 @@ export default function App() {
         </ScrollView>
       </View>
       {toastNode}
+    </SafeAreaView>
+  );
+}
+
+function ConfigMissingScreen() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <View style={styles.configShell}>
+        <View style={styles.configCard}>
+          <Text style={styles.configKicker}>Configuracao pendente</Text>
+          <Text style={styles.configTitle}>Conecte o Supabase para abrir o AgroSolution</Text>
+          <Text style={styles.configText}>{supabaseConfigError}</Text>
+          <View style={styles.configSteps}>
+            <Text style={styles.configStep}>1. Copie apps/mobile/.env.example para apps/mobile/.env</Text>
+            <Text style={styles.configStep}>2. Preencha EXPO_PUBLIC_SUPABASE_URL</Text>
+            <Text style={styles.configStep}>3. Preencha EXPO_PUBLIC_SUPABASE_ANON_KEY</Text>
+            <Text style={styles.configStep}>4. Pare o Expo com Ctrl+C e rode npm run dev de novo</Text>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -191,5 +221,53 @@ const styles = StyleSheet.create({
   },
   modeTextActive: {
     color: colors.surface,
+  },
+  configShell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: colors.surfaceSoft,
+  },
+  configCard: {
+    width: '100%',
+    maxWidth: 620,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    backgroundColor: colors.surface,
+    padding: 24,
+    gap: 14,
+  },
+  configKicker: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  configTitle: {
+    color: colors.text,
+    fontSize: 24,
+    fontWeight: '900',
+    lineHeight: 30,
+  },
+  configText: {
+    color: colors.textMuted,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  configSteps: {
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    backgroundColor: colors.surfaceSoft,
+    padding: 14,
+  },
+  configStep: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
   },
 });
