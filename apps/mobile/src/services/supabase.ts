@@ -1,22 +1,27 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!url || !anonKey) {
-  throw new Error(
-    'Variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY não encontradas. ' +
-      'Crie um arquivo .env em apps/mobile/ baseado no .env.example.',
-  );
-}
+export const supabaseConfigError =
+  'Variaveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY nao encontradas. ' +
+  'Crie um arquivo .env em apps/mobile/ baseado no .env.example.';
 
-// Cliente único compartilhado por todo o app.
-// Em web, supabase-js usa localStorage automaticamente para guardar a sessão.
-// Em mobile, depois trocamos para expo-secure-store.
-export const supabase = createClient(url, anonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+export const isSupabaseConfigured = Boolean(url && anonKey);
+
+export const supabase: SupabaseClient | null = isSupabaseConfigured
+  ? createClient(url as string, anonKey as string, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : null;
+
+export function getSupabaseClient(): SupabaseClient {
+  if (!supabase) {
+    throw new Error(supabaseConfigError);
+  }
+  return supabase;
+}

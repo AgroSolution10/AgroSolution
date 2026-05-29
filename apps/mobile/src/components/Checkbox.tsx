@@ -18,7 +18,7 @@ export function Checkbox({ checked, onChange, label, description, error }: Check
         onPress={() => onChange(!checked)}
         style={styles.row}
       >
-        <View style={[styles.box, checked && styles.boxChecked, error && !checked && styles.boxError]}>
+        <View style={[styles.box, checked && styles.boxChecked, error && !checked ? styles.boxError : null]}>
           {checked && <Text style={styles.tick}>✓</Text>}
         </View>
         <View style={styles.text}>
