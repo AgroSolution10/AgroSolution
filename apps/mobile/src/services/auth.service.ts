@@ -248,6 +248,32 @@ export async function atualizarPerfil(dados: {
   }
 }
 
+/**
+ * Troca o e-mail do usuário no Auth e na tabela `usuario`.
+ * Obs.: para a troca ser imediata (sem e-mail de confirmação), desative
+ * "Secure email change" em Authentication → Email no painel do Supabase.
+ */
+export async function atualizarEmail(novoEmail: string): Promise<void> {
+  const supabase = getSupabaseClient();
+  const email = (novoEmail ?? '').trim().toLowerCase();
+
+  const { data, error } = await supabase.auth.updateUser({ email });
+  if (error) throw new Error(traduzirErro(error.message));
+
+  const userId = data.user?.id;
+  if (userId) {
+    const { error: erroTabela } = await supabase.from('usuario').update({ email }).eq('id', userId);
+    if (erroTabela) throw new Error(traduzirErro(erroTabela.message));
+  }
+}
+
+/** Troca a senha do usuário logado (a própria sessão autoriza). */
+export async function atualizarSenha(novaSenha: string): Promise<void> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.auth.updateUser({ password: novaSenha });
+  if (error) throw new Error(traduzirErro(error.message));
+}
+
 /** Atualiza a coordenada da fazenda (editor de localização em Configurações). */
 export async function atualizarLocalizacao(
   fazendaId: string,

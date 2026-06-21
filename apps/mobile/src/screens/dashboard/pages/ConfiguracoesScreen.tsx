@@ -1,16 +1,27 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { MapaLocalizacao } from '@/components/MapaLocalizacao';
 import { Toast, type ToastTipo } from '@/components/Toast';
-import { EmConstrucao } from '@/screens/dashboard/components/EmConstrucao';
 import { PageScaffold } from '@/screens/dashboard/components/PageScaffold';
-import { atualizarLocalizacao, atualizarPerfil } from '@/services/auth.service';
+import {
+  atualizarEmail,
+  atualizarLocalizacao,
+  atualizarPerfil,
+  atualizarSenha,
+} from '@/services/auth.service';
+import {
+  lerPreferencias,
+  salvarPreferencias,
+  type Preferencias,
+} from '@/services/preferencias.service';
 import { maskDecimal, parseDecimal } from '@/utils/masks';
 import { colors, radius, shadows } from '@/theme/colors';
 import { Cultura, Usuario } from '@/screens/auth/cadastro/types';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type ConfiguracoesScreenProps = {
   desktop: boolean;
@@ -41,12 +52,9 @@ export function ConfiguracoesScreen({ desktop, usuario, onUsuarioAtualizado }: C
 
       <LocalizacaoEditor usuario={usuario} onUsuarioAtualizado={onUsuarioAtualizado} />
 
-      <EmConstrucao
-        icon="settings"
-        titulo="Mais opções em breve"
-        descricao="Você já pode editar seu perfil e a localização. Troca de e-mail e senha vêm a seguir."
-        itens={['Trocar e-mail (com confirmação)', 'Trocar senha', 'Preferências de notificação']}
-      />
+      <SegurancaCard />
+
+      <NotificacoesCard usuario={usuario} />
     </PageScaffold>
   );
 }
@@ -60,6 +68,7 @@ function PerfilEditor({
 }) {
   const [editando, setEditando] = useState(false);
   const [nome, setNome] = useState(usuario.nome);
+  const [email, setEmail] = useState(usuario.email);
   const [area, setArea] = useState(usuario.areaTotal ?? '');
   const [cultura, setCultura] = useState<Cultura | null>(usuario.culturas[0] ?? null);
   const [salvando, setSalvando] = useState(false);
@@ -68,6 +77,7 @@ function PerfilEditor({
 
   function cancelar() {
     setNome(usuario.nome);
+    setEmail(usuario.email);
     setArea(usuario.areaTotal ?? '');
     setCultura(usuario.culturas[0] ?? null);
     setErro(null);
@@ -80,10 +90,16 @@ function PerfilEditor({
       setErro('O nome precisa ter ao menos 2 caracteres.');
       return;
     }
+    const novoEmail = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(novoEmail)) {
+      setErro('Informe um e-mail válido.');
+      return;
+    }
     const areaNum = parseDecimal(area);
 
     setSalvando(true);
     try {
+      if (novoEmail !== usuario.email) await atualizarEmail(novoEmail);
       await atualizarPerfil({
         nome,
         fazendaId: usuario.fazendaId,
@@ -93,6 +109,7 @@ function PerfilEditor({
       onUsuarioAtualizado?.({
         ...usuario,
         nome: nome.trim(),
+        email: novoEmail,
         areaTotal: Number.isFinite(areaNum) && areaNum > 0 ? area : usuario.areaTotal,
         culturas: cultura ? [cultura] : usuario.culturas,
       });
@@ -134,14 +151,14 @@ function PerfilEditor({
         <View style={styles.form}>
           <Input label="Nome" value={nome} onChangeText={setNome} placeholder="Seu nome" />
 
-          <View style={styles.bloco}>
-            <Text style={styles.label}>E-mail</Text>
-            <View style={styles.emailLock}>
-              <Text style={styles.emailText}>{usuario.email}</Text>
-              <Feather name="lock" size={14} color={colors.textSoft} />
-            </View>
-            <Text style={styles.dica}>A troca de e-mail exige confirmação — em breve.</Text>
-          </View>
+          <Input
+            label="E-mail"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholder="voce@email.com"
+          />
 
           {usuario.fazendaId ? (
             <>
@@ -258,6 +275,153 @@ function LocalizacaoEditor({
   );
 }
 
+function SegurancaCard() {
+  const [aberto, setAberto] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [confirma, setConfirma] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ tipo: ToastTipo; mensagem: string } | null>(null);
+
+  function fechar() {
+    setAberto(false);
+    setSenha('');
+    setConfirma('');
+    setErro(null);
+  }
+
+  async function salvar() {
+    setErro(null);
+    if (senha.length < 6) {
+      setErro('A senha precisa ter ao menos 6 caracteres.');
+      return;
+    }
+    if (senha !== confirma) {
+      setErro('As senhas não conferem.');
+      return;
+    }
+    setSalvando(true);
+    try {
+      await atualizarSenha(senha);
+      setToast({ tipo: 'sucesso', mensagem: 'Senha atualizada! 🔒' });
+      fechar();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Não foi possível salvar.');
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitulo}>Segurança</Text>
+        {!aberto ? (
+          <Pressable
+            onPress={() => setAberto(true)}
+            style={({ pressed }) => [styles.editarBtn, pressed && styles.pressed]}
+          >
+            <Feather name="lock" size={14} color={colors.primary} />
+            <Text style={styles.editarText}>Trocar senha</Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {aberto ? (
+        <View style={styles.form}>
+          <Input
+            label="Nova senha"
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+            placeholder="mínimo 6 caracteres"
+          />
+          <Input
+            label="Confirmar nova senha"
+            value={confirma}
+            onChangeText={setConfirma}
+            secureTextEntry
+            placeholder="repita a senha"
+          />
+          {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+          <View style={styles.acoes}>
+            <Button title="Cancelar" variant="secondary" onPress={fechar} style={styles.acaoBtn} />
+            <Button title="Salvar senha" onPress={salvar} loading={salvando} style={styles.acaoBtn} />
+          </View>
+        </View>
+      ) : (
+        <Text style={styles.cardSub}>Atualize sua senha de acesso quando quiser.</Text>
+      )}
+
+      {toast ? <Toast tipo={toast.tipo} mensagem={toast.mensagem} onClose={() => setToast(null)} /> : null}
+    </View>
+  );
+}
+
+function NotificacoesCard({ usuario }: { usuario: Usuario }) {
+  const [prefs, setPrefs] = useState<Preferencias>(() => lerPreferencias(usuario.email));
+
+  function toggle(chave: keyof Preferencias) {
+    const novo = { ...prefs, [chave]: !prefs[chave] };
+    setPrefs(novo);
+    salvarPreferencias(usuario.email, novo);
+  }
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitulo}>Notificações</Text>
+      <LinhaSwitch
+        label="Alertas de preço"
+        descricao="Quando um preço-alvo é atingido"
+        valor={prefs.alertasPreco}
+        onToggle={() => toggle('alertasPreco')}
+      />
+      <LinhaSwitch
+        label="Clima e pulverização"
+        descricao="Previsão de chuva e janelas de aplicação"
+        valor={prefs.clima}
+        onToggle={() => toggle('clima')}
+      />
+      <LinhaSwitch
+        label="Mercado e cotações"
+        descricao="Altas e quedas relevantes das commodities"
+        valor={prefs.mercado}
+        onToggle={() => toggle('mercado')}
+      />
+      <Text style={styles.cardSubFoot}>
+        As notificações push chegam quando o app estiver instalado no celular.
+      </Text>
+    </View>
+  );
+}
+
+function LinhaSwitch({
+  label,
+  descricao,
+  valor,
+  onToggle,
+}: {
+  label: string;
+  descricao: string;
+  valor: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <View style={styles.switchLinha}>
+      <View style={styles.switchTexto}>
+        <Text style={styles.switchLabel}>{label}</Text>
+        <Text style={styles.switchDesc}>{descricao}</Text>
+      </View>
+      <Switch
+        value={valor}
+        onValueChange={onToggle}
+        trackColor={{ true: colors.primary, false: colors.border }}
+        thumbColor={colors.surface}
+      />
+    </View>
+  );
+}
+
 function Campo({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
     <View style={styles.campo}>
@@ -325,24 +489,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  emailLock: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: 14,
-    minHeight: 48,
-  },
-  emailText: {
-    color: colors.textMuted,
-    fontSize: 15,
-  },
-  dica: {
+  cardSubFoot: {
     color: colors.textSoft,
     fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+  },
+  switchLinha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+    paddingTop: 14,
+  },
+  switchTexto: {
+    flex: 1,
+    gap: 2,
+  },
+  switchLabel: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  switchDesc: {
+    color: colors.textMuted,
+    fontSize: 13,
   },
   culturas: {
     flexDirection: 'row',
