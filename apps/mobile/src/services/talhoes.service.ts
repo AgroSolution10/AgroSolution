@@ -3,6 +3,8 @@
  * cultura, área (ha) e um ponto no mapa. Pertence a uma fazenda; a RLS
  * (ver docs/sql/09_talhao.sql) garante que só membros da fazenda acessam.
  */
+import type { FiltroPeriodo } from '@/components/FiltrosPeriodo';
+import { limitesDoFiltro } from './financeiro.service';
 import { supabase } from './supabase';
 
 export type Talhao = {
@@ -73,23 +75,30 @@ export type ResultadoTalhao = { receita: number; custo: number; resultado: numbe
 
 /**
  * Soma receita/custo/resultado por talhão a partir do rateio (lancamento_talhao).
- * A RLS já restringe aos lançamentos do usuário; devolve um mapa talhaoId → totais.
+ * A RLS já restringe aos lançamentos do usuário. Quando um filtro é informado,
+ * considera apenas lançamentos cuja data cai no período.
+ * Devolve um mapa talhaoId → totais.
  */
-export async function buscarResultadosTalhoes(): Promise<Record<string, ResultadoTalhao>> {
+export async function buscarResultadosTalhoes(
+  filtro?: FiltroPeriodo,
+): Promise<Record<string, ResultadoTalhao>> {
   if (!supabase) return {};
   try {
     const { data, error } = await supabase
       .from('lancamento_talhao')
-      .select('talhao_id, valor, lancamento:lancamento_id(tipo)');
+      .select('talhao_id, valor, lancamento:lancamento_id(tipo, data)');
     if (error) throw error;
+
+    const limites = filtro ? limitesDoFiltro(filtro) : null;
 
     const mapa: Record<string, ResultadoTalhao> = {};
     for (const linha of data ?? []) {
-      const tipo = (linha.lancamento as { tipo?: string } | null)?.tipo;
+      const lanc = linha.lancamento as { tipo?: string; data?: string } | null;
+      if (limites && lanc?.data && !(lanc.data >= limites.inicio && lanc.data < limites.fim)) continue;
       const valor = Number(linha.valor) || 0;
       const m = (mapa[linha.talhao_id] ??= { receita: 0, custo: 0, resultado: 0 });
-      if (tipo === 'receita') m.receita += valor;
-      else if (tipo === 'despesa') m.custo += valor;
+      if (lanc?.tipo === 'receita') m.receita += valor;
+      else if (lanc?.tipo === 'despesa') m.custo += valor;
       m.resultado = m.receita - m.custo;
     }
     return mapa;

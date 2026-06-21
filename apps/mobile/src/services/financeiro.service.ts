@@ -232,6 +232,12 @@ function rangeDoFiltro(filtro: FiltroPeriodo, hoje: Date): RangeData {
   }
 }
 
+/** Limites de data [inicio, fim) de um filtro — reutilizável por outros serviços. */
+export function limitesDoFiltro(filtro: FiltroPeriodo): { inicio: string; fim: string } {
+  const r = rangeDoFiltro(filtro, new Date());
+  return { inicio: r.inicio, fim: r.fim };
+}
+
 /** Resumo do período escolhido (receita, custos, lucro e variação vs. anterior). */
 export async function buscarResumoFinanceiro(
   filtro: FiltroPeriodo = { periodo: 'mes' },

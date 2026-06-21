@@ -9,6 +9,7 @@ import { RadarScreen } from '@/screens/dashboard/pages/RadarScreen';
 import { AlertasScreen } from '@/screens/dashboard/pages/AlertasScreen';
 import { FinanceiroScreen } from '@/screens/dashboard/pages/FinanceiroScreen';
 import { TalhoesScreen } from '@/screens/dashboard/pages/TalhoesScreen';
+import { RelatoriosScreen } from '@/screens/dashboard/pages/RelatoriosScreen';
 import { ConfiguracoesScreen } from '@/screens/dashboard/pages/ConfiguracoesScreen';
 import { VozScreen } from '@/screens/dashboard/pages/VozScreen';
 import { colors } from '@/theme/colors';
@@ -141,6 +142,8 @@ function PaginaAtiva({
       return <FinanceiroScreen desktop={desktop} usuario={usuario} />;
     case 'talhoes':
       return <TalhoesScreen desktop={desktop} usuario={usuario} />;
+    case 'relatorios':
+      return <RelatoriosScreen desktop={desktop} usuario={usuario} />;
     case 'voz':
       return <VozScreen desktop={desktop} />;
     case 'configuracoes':

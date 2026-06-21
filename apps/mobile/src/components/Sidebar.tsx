@@ -10,6 +10,7 @@ export type MenuItemId =
   | 'alertas'
   | 'financeiro'
   | 'talhoes'
+  | 'relatorios'
   | 'voz'
   | 'configuracoes';
 
@@ -25,6 +26,7 @@ const ITENS: MenuItem[] = [
   { id: 'alertas', label: 'Alertas', icon: 'bell' },
   { id: 'financeiro', label: 'Financeiro', icon: 'dollar-sign' },
   { id: 'talhoes', label: 'Talhões', icon: 'map' },
+  { id: 'relatorios', label: 'Relatórios', icon: 'file-text' },
   { id: 'voz', label: 'Comando de Voz', icon: 'mic' },
   { id: 'configuracoes', label: 'Configurações', icon: 'settings' },
 ];
