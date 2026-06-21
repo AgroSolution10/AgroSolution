@@ -5,7 +5,13 @@ import { MapaTalhoes, type PontoTalhao } from '@/components/MapaTalhoes';
 import { Toast, type ToastTipo } from '@/components/Toast';
 import { PageScaffold } from '@/screens/dashboard/components/PageScaffold';
 import { TalhaoFormModal } from '@/screens/dashboard/components/TalhaoFormModal';
-import { excluirTalhao, listarTalhoes, type Talhao } from '@/services/talhoes.service';
+import {
+  buscarResultadosTalhoes,
+  excluirTalhao,
+  listarTalhoes,
+  type ResultadoTalhao,
+  type Talhao,
+} from '@/services/talhoes.service';
 import { colors, radius, shadows } from '@/theme/colors';
 import { Usuario } from '@/screens/auth/cadastro/types';
 
@@ -28,6 +34,7 @@ const ROTULO_CULTURA: Record<string, string> = {
 export function TalhoesScreen({ desktop, usuario }: TalhoesScreenProps) {
   const fazendaId = usuario.fazendaId;
   const [talhoes, setTalhoes] = useState<Talhao[] | null>(null);
+  const [resultados, setResultados] = useState<Record<string, ResultadoTalhao>>({});
   const [modalAberto, setModalAberto] = useState(false);
   const [confirmandoId, setConfirmandoId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ tipo: ToastTipo; mensagem: string } | null>(null);
@@ -40,6 +47,7 @@ export function TalhoesScreen({ desktop, usuario }: TalhoesScreenProps) {
     setTalhoes(null);
     setConfirmandoId(null);
     listarTalhoes(fazendaId).then(setTalhoes);
+    buscarResultadosTalhoes().then(setResultados);
   }, [fazendaId]);
 
   useEffect(() => {
@@ -127,6 +135,7 @@ export function TalhoesScreen({ desktop, usuario }: TalhoesScreenProps) {
                     <ItemTalhao
                       key={t.id}
                       talhao={t}
+                      resultado={resultados[t.id]}
                       confirmando={confirmandoId === t.id}
                       onPedirExcluir={() => setConfirmandoId(t.id)}
                       onCancelar={() => setConfirmandoId(null)}
@@ -168,13 +177,14 @@ function Indicador({ valor, rotulo }: { valor: string; rotulo: string }) {
 
 type ItemProps = {
   talhao: Talhao;
+  resultado?: ResultadoTalhao;
   confirmando: boolean;
   onPedirExcluir: () => void;
   onCancelar: () => void;
   onConfirmar: () => void;
 };
 
-function ItemTalhao({ talhao, confirmando, onPedirExcluir, onCancelar, onConfirmar }: ItemProps) {
+function ItemTalhao({ talhao, resultado, confirmando, onPedirExcluir, onCancelar, onConfirmar }: ItemProps) {
   const detalhes = [
     talhao.cultura ? ROTULO_CULTURA[talhao.cultura] ?? talhao.cultura : null,
     talhao.areaHa != null ? `${talhao.areaHa.toLocaleString('pt-BR')} ha` : null,
@@ -183,30 +193,64 @@ function ItemTalhao({ talhao, confirmando, onPedirExcluir, onCancelar, onConfirm
     .filter(Boolean)
     .join(' · ');
 
+  const temFinanceiro = resultado && (resultado.receita > 0 || resultado.custo > 0);
+
   return (
-    <View style={styles.item}>
-      <View style={styles.itemTexto}>
-        <Text style={styles.itemTitulo}>{talhao.nome}</Text>
-        <Text style={styles.itemDetalhe}>{detalhes || 'Sem detalhes'}</Text>
+    <View style={styles.itemWrap}>
+      <View style={styles.item}>
+        <View style={styles.itemTexto}>
+          <Text style={styles.itemTitulo}>{talhao.nome}</Text>
+          <Text style={styles.itemDetalhe}>{detalhes || 'Sem detalhes'}</Text>
+        </View>
+
+        {confirmando ? (
+          <View style={styles.confirmar}>
+            <Text style={styles.confirmarText}>Excluir?</Text>
+            <Pressable onPress={onConfirmar} hitSlop={8} style={[styles.confirmarBtn, styles.confirmarSim]}>
+              <Feather name="check" size={16} color={colors.surface} />
+            </Pressable>
+            <Pressable onPress={onCancelar} hitSlop={8} style={[styles.confirmarBtn, styles.confirmarNao]}>
+              <Feather name="x" size={16} color={colors.textMuted} />
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={onPedirExcluir} hitSlop={8} style={styles.lixeira} accessibilityLabel="Excluir talhão">
+            <Feather name="trash-2" size={16} color={colors.textSoft} />
+          </Pressable>
+        )}
       </View>
 
-      {confirmando ? (
-        <View style={styles.confirmar}>
-          <Text style={styles.confirmarText}>Excluir?</Text>
-          <Pressable onPress={onConfirmar} hitSlop={8} style={[styles.confirmarBtn, styles.confirmarSim]}>
-            <Feather name="check" size={16} color={colors.surface} />
-          </Pressable>
-          <Pressable onPress={onCancelar} hitSlop={8} style={[styles.confirmarBtn, styles.confirmarNao]}>
-            <Feather name="x" size={16} color={colors.textMuted} />
-          </Pressable>
+      {temFinanceiro && resultado ? (
+        <View style={styles.financeiro}>
+          <FinItem valor={formatBrl(resultado.receita)} rotulo="receita" cor={colors.success} />
+          <FinItem valor={formatBrl(resultado.custo)} rotulo="custo" cor={colors.danger} />
+          <FinItem
+            valor={formatBrl(resultado.resultado)}
+            rotulo="resultado"
+            cor={resultado.resultado >= 0 ? colors.success : colors.danger}
+          />
         </View>
-      ) : (
-        <Pressable onPress={onPedirExcluir} hitSlop={8} style={styles.lixeira} accessibilityLabel="Excluir talhão">
-          <Feather name="trash-2" size={16} color={colors.textSoft} />
-        </Pressable>
-      )}
+      ) : null}
     </View>
   );
+}
+
+function FinItem({ valor, rotulo, cor }: { valor: string; rotulo: string; cor: string }) {
+  return (
+    <View style={styles.fin}>
+      <Text style={[styles.finValor, { color: cor }]}>{valor}</Text>
+      <Text style={styles.finRotulo}>{rotulo}</Text>
+    </View>
+  );
+}
+
+function formatBrl(valor: number) {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 }
 
 const styles = StyleSheet.create({
@@ -278,13 +322,41 @@ const styles = StyleSheet.create({
   lista: {
     gap: 0,
   },
+  itemWrap: {
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
+  },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
+  },
+  financeiro: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    paddingBottom: 14,
+    paddingLeft: 0,
+  },
+  fin: {
+    flexGrow: 1,
+    flexBasis: 90,
+    backgroundColor: colors.surfaceSoft,
+    borderRadius: radius.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 1,
+  },
+  finValor: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  finRotulo: {
+    color: colors.textSoft,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   itemTexto: {
     flex: 1,

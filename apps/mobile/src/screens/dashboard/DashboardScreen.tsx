@@ -138,7 +138,7 @@ function PaginaAtiva({
     case 'alertas':
       return <AlertasScreen desktop={desktop} usuario={usuario} />;
     case 'financeiro':
-      return <FinanceiroScreen desktop={desktop} />;
+      return <FinanceiroScreen desktop={desktop} usuario={usuario} />;
     case 'talhoes':
       return <TalhoesScreen desktop={desktop} usuario={usuario} />;
     case 'voz':

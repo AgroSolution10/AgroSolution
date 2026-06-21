@@ -10,6 +10,7 @@
  * Ver migration docs/sql/06_lancamento_financeiro.sql.
  */
 import type { FiltroPeriodo } from '@/components/FiltrosPeriodo';
+import type { Alocacao, MetodoDivisao, ModoRateio } from '@/utils/rateio';
 import { supabase } from './supabase';
 
 const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -32,6 +33,13 @@ export type PontoEvolucao = { mes: string; receita: number; despesa: number };
 
 export type TipoLancamento = 'receita' | 'despesa';
 
+/** Rateio (atribuição a talhões) que acompanha um lançamento. */
+export type RateioInput = {
+  modo: ModoRateio;
+  metodo?: MetodoDivisao;
+  alocacoes: Alocacao[];
+};
+
 /** Dados que a tela de "novo lançamento" envia. */
 export type NovoLancamento = {
   tipo: TipoLancamento;
@@ -40,6 +48,8 @@ export type NovoLancamento = {
   categoria?: string;
   /** 'YYYY-MM-DD'. Se omitido, o banco usa a data de hoje. */
   data?: string;
+  /** Rateio por talhão (ausente = geral / não atribuído). */
+  rateio?: RateioInput;
 };
 
 /** Um lançamento já gravado, como vem do banco para listas. */
@@ -50,6 +60,8 @@ export type LancamentoItem = {
   categoria: string | null;
   valor: number;
   data: string;
+  rateioModo: ModoRateio | null;
+  rateioMetodo: MetodoDivisao | null;
 };
 
 type LinhaLancamento = {
@@ -362,12 +374,49 @@ export async function criarLancamento(novo: NovoLancamento): Promise<void> {
     valor: novo.valor,
     descricao: novo.descricao?.trim() || null,
     categoria: novo.categoria?.trim() || null,
+    rateio_modo: novo.rateio?.modo ?? 'geral',
+    rateio_metodo: novo.rateio?.metodo ?? null,
   };
   // Só manda a data se o usuário escolheu uma — senão deixa o default do banco.
   if (novo.data) payload.data = novo.data;
 
-  const { error } = await supabase.from('lancamento').insert(payload);
+  const { data, error } = await supabase.from('lancamento').insert(payload).select('id').single();
   if (error) throw new Error(error.message);
+
+  await inserirRateio(data.id as string, novo.rateio?.alocacoes ?? []);
+}
+
+/** Grava as parcelas do rateio (lancamento_talhao) de um lançamento. */
+async function inserirRateio(lancamentoId: string, alocacoes: Alocacao[]): Promise<void> {
+  if (!supabase || alocacoes.length === 0) return;
+  const linhas = alocacoes.map((a) => ({
+    lancamento_id: lancamentoId,
+    talhao_id: a.talhaoId,
+    valor: a.valor,
+    percentual: a.percentual,
+  }));
+  const { error } = await supabase.from('lancamento_talhao').insert(linhas);
+  if (error) throw new Error(error.message);
+}
+
+/** Carrega as parcelas de rateio de um lançamento (para reabrir a edição). */
+export async function buscarAlocacoes(lancamentoId: string): Promise<Alocacao[]> {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('lancamento_talhao')
+      .select('talhao_id, valor, percentual')
+      .eq('lancamento_id', lancamentoId);
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      talhaoId: r.talhao_id,
+      valor: Number(r.valor),
+      percentual: Number(r.percentual),
+    }));
+  } catch (erro) {
+    console.warn('[financeiro] falha ao buscar rateio:', erro);
+    return [];
+  }
 }
 
 /**
@@ -382,11 +431,18 @@ export async function atualizarLancamento(id: string, dados: NovoLancamento): Pr
     valor: dados.valor,
     descricao: dados.descricao?.trim() || null,
     categoria: dados.categoria?.trim() || null,
+    rateio_modo: dados.rateio?.modo ?? 'geral',
+    rateio_metodo: dados.rateio?.metodo ?? null,
   };
   if (dados.data) payload.data = dados.data;
 
   const { error } = await supabase.from('lancamento').update(payload).eq('id', id);
   if (error) throw new Error(error.message);
+
+  // Refaz o rateio do zero (mais simples e sempre consistente).
+  const { error: erroDel } = await supabase.from('lancamento_talhao').delete().eq('lancamento_id', id);
+  if (erroDel) throw new Error(erroDel.message);
+  await inserirRateio(id, dados.rateio?.alocacoes ?? []);
 }
 
 /** Exclui um lançamento. A RLS impede apagar o de outra pessoa. */
@@ -406,7 +462,7 @@ export async function listarLancamentos(filtro?: FiltroPeriodo, limite = 50): Pr
   try {
     let consulta = supabase
       .from('lancamento')
-      .select('id, tipo, descricao, categoria, valor, data')
+      .select('id, tipo, descricao, categoria, valor, data, rateio_modo, rateio_metodo')
       .order('data', { ascending: false })
       .order('criado_em', { ascending: false });
 
@@ -425,6 +481,8 @@ export async function listarLancamentos(filtro?: FiltroPeriodo, limite = 50): Pr
       categoria: l.categoria,
       valor: Number(l.valor),
       data: String(l.data),
+      rateioModo: (l.rateio_modo ?? null) as ModoRateio | null,
+      rateioMetodo: (l.rateio_metodo ?? null) as MetodoDivisao | null,
     }));
   } catch (erro) {
     console.warn('[financeiro] falha ao listar lançamentos:', erro);

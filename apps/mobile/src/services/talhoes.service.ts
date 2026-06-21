@@ -68,3 +68,33 @@ export async function excluirTalhao(id: string): Promise<void> {
   const { error } = await supabase.from('talhao').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+
+export type ResultadoTalhao = { receita: number; custo: number; resultado: number };
+
+/**
+ * Soma receita/custo/resultado por talhão a partir do rateio (lancamento_talhao).
+ * A RLS já restringe aos lançamentos do usuário; devolve um mapa talhaoId → totais.
+ */
+export async function buscarResultadosTalhoes(): Promise<Record<string, ResultadoTalhao>> {
+  if (!supabase) return {};
+  try {
+    const { data, error } = await supabase
+      .from('lancamento_talhao')
+      .select('talhao_id, valor, lancamento:lancamento_id(tipo)');
+    if (error) throw error;
+
+    const mapa: Record<string, ResultadoTalhao> = {};
+    for (const linha of data ?? []) {
+      const tipo = (linha.lancamento as { tipo?: string } | null)?.tipo;
+      const valor = Number(linha.valor) || 0;
+      const m = (mapa[linha.talhao_id] ??= { receita: 0, custo: 0, resultado: 0 });
+      if (tipo === 'receita') m.receita += valor;
+      else if (tipo === 'despesa') m.custo += valor;
+      m.resultado = m.receita - m.custo;
+    }
+    return mapa;
+  } catch (erro) {
+    console.warn('[talhoes] falha ao calcular resultados:', erro);
+    return {};
+  }
+}

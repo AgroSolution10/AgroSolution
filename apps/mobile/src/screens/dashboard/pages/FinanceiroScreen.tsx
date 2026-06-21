@@ -11,9 +11,11 @@ import { LancamentosRecentes } from '@/screens/dashboard/components/LancamentosR
 import { PageScaffold } from '@/screens/dashboard/components/PageScaffold';
 import { excluirLancamento, type LancamentoItem } from '@/services/financeiro.service';
 import { colors, radius } from '@/theme/colors';
+import { Usuario } from '@/screens/auth/cadastro/types';
 
 type FinanceiroScreenProps = {
   desktop: boolean;
+  usuario: Usuario;
 };
 
 /**
@@ -21,7 +23,7 @@ type FinanceiroScreenProps = {
  * recentes vêm da tabela `lancamento` (Supabase). Dá para criar, editar e
  * excluir lançamentos; ao mudar, os cards recarregam via refreshKey.
  */
-export function FinanceiroScreen({ desktop }: FinanceiroScreenProps) {
+export function FinanceiroScreen({ desktop, usuario }: FinanceiroScreenProps) {
   // null = fechado; 'novo' = criar; objeto = editar aquele lançamento.
   const [modal, setModal] = useState<'novo' | LancamentoItem | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -96,6 +98,7 @@ export function FinanceiroScreen({ desktop }: FinanceiroScreenProps) {
       {modal !== null && (
         <LancamentoFormModal
           lancamento={modal === 'novo' ? null : modal}
+          fazendaId={usuario.fazendaId}
           onFechar={() => setModal(null)}
           onSalvo={aoSalvar}
         />
