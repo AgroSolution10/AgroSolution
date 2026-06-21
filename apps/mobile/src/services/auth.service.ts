@@ -217,6 +217,37 @@ async function carregarUsuario(userId: string): Promise<Usuario> {
   };
 }
 
+/**
+ * Atualiza os dados de perfil editáveis: nome (em `usuario`) e, se houver
+ * fazenda, área e cultura principal (em `fazenda`). E-mail não entra aqui —
+ * trocar e-mail mexe no Supabase Auth e exige confirmação.
+ */
+export async function atualizarPerfil(dados: {
+  nome?: string;
+  fazendaId?: string;
+  areaTotal?: number;
+  cultura?: Cultura;
+}): Promise<void> {
+  const supabase = getSupabaseClient();
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error('Sessão expirada. Entre novamente.');
+
+  const nome = dados.nome?.trim();
+  if (nome) {
+    const { error } = await supabase.from('usuario').update({ nome }).eq('id', userId);
+    if (error) throw new Error(traduzirErro(error.message));
+  }
+
+  if (dados.fazendaId && (Number.isFinite(dados.areaTotal) || dados.cultura)) {
+    const payload: Record<string, unknown> = {};
+    if (Number.isFinite(dados.areaTotal)) payload.area_total_ha = dados.areaTotal;
+    if (dados.cultura) payload.cultura_principal = dados.cultura;
+    const { error } = await supabase.from('fazenda').update(payload).eq('id', dados.fazendaId);
+    if (error) throw new Error(traduzirErro(error.message));
+  }
+}
+
 /** Atualiza a coordenada da fazenda (editor de localização em Configurações). */
 export async function atualizarLocalizacao(
   fazendaId: string,
