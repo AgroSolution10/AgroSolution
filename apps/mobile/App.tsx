@@ -86,7 +86,7 @@ export default function App() {
     return (
       <View style={{ flex: 1 }}>
         <StatusBar style="dark" />
-        <DashboardScreen usuario={usuario} onLogout={sair} />
+        <DashboardScreen usuario={usuario} onLogout={sair} onUsuarioAtualizado={setUsuario} />
         {toastNode}
       </View>
     );

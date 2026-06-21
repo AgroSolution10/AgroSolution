@@ -51,20 +51,25 @@ export const radius = {
   pill: 999,
 };
 
-// Sombras suaves dão a sensação "flutuante" no lugar de bordas duras.
+// Design clean: cards definidos por uma borda fininha (hairline) + uma sombra
+// quase imperceptível, em vez de sombras grossas "flutuantes".
 export const shadows = {
   card: {
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   soft: {
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 0,
   },
 };

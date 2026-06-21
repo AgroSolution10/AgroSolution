@@ -1,7 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { colors } from '@/theme/colors';
 
@@ -19,15 +19,32 @@ const PIN_AGRO = L.divIcon({
   iconAnchor: [17, 46],
 });
 
+// Pin de referência (sede da fazenda) — amarelo, para distinguir do verde.
+const PIN_REFERENCIA = L.divIcon({
+  className: 'agro-pin-ref',
+  html: `
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 34 46">
+      <path d="M17 0C7.611 0 0 7.611 0 17c0 12.75 17 29 17 29s17-16.25 17-29C34 7.611 26.389 0 17 0z" fill="#FFC107" stroke="#1B1F1A" stroke-width="2"/>
+      <circle cx="17" cy="17" r="6" fill="#1B1F1A"/>
+    </svg>
+  `,
+  iconSize: [30, 40],
+  iconAnchor: [15, 40],
+});
+
 const COORD_PADRAO: [number, number] = [-15.7801, -47.9292];
+
+export type ReferenciaMapa = { latitude: number; longitude: number; label?: string };
 
 type MapaProps = {
   latitude: string;
   longitude: string;
   onChange: (lat: string, lng: string) => void;
+  /** Marcador fixo de referência (ex.: sede da fazenda) + centro inicial. */
+  referencia?: ReferenciaMapa;
 };
 
-export function MapaLocalizacao({ latitude, longitude, onChange }: MapaProps) {
+export function MapaLocalizacao({ latitude, longitude, onChange, referencia }: MapaProps) {
   if (Platform.OS !== 'web') {
     return (
       <View style={styles.fallback}>
@@ -37,10 +54,10 @@ export function MapaLocalizacao({ latitude, longitude, onChange }: MapaProps) {
       </View>
     );
   }
-  return <MapaWeb latitude={latitude} longitude={longitude} onChange={onChange} />;
+  return <MapaWeb latitude={latitude} longitude={longitude} onChange={onChange} referencia={referencia} />;
 }
 
-function MapaWeb({ latitude, longitude, onChange }: MapaProps) {
+function MapaWeb({ latitude, longitude, onChange, referencia }: MapaProps) {
   const [busca, setBusca] = useState('');
   const [buscando, setBuscando] = useState(false);
   const [erroBusca, setErroBusca] = useState('');
@@ -49,9 +66,15 @@ function MapaWeb({ latitude, longitude, onChange }: MapaProps) {
   const lng = parseFloat(longitude.replace(',', '.'));
   const temCoord = Number.isFinite(lat) && Number.isFinite(lng);
   const center = useMemo<[number, number]>(
-    () => (temCoord ? [lat, lng] : COORD_PADRAO),
-    [lat, lng, temCoord],
+    () =>
+      temCoord
+        ? [lat, lng]
+        : referencia
+          ? [referencia.latitude, referencia.longitude]
+          : COORD_PADRAO,
+    [lat, lng, temCoord, referencia?.latitude, referencia?.longitude],
   );
+  const temReferencia = referencia != null;
 
   function selecionar(latNum: number, lngNum: number) {
     onChange(latNum.toFixed(6), lngNum.toFixed(6));
@@ -102,7 +125,7 @@ function MapaWeb({ latitude, longitude, onChange }: MapaProps) {
       <View style={styles.mapShell}>
         <MapContainer
           center={center}
-          zoom={temCoord ? 13 : 4}
+          zoom={temCoord || temReferencia ? 13 : 4}
           scrollWheelZoom
           style={{ height: 360, width: '100%' }}
         >
@@ -110,6 +133,11 @@ function MapaWeb({ latitude, longitude, onChange }: MapaProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
+          {referencia ? (
+            <Marker position={[referencia.latitude, referencia.longitude]} icon={PIN_REFERENCIA}>
+              <Tooltip>{referencia.label ?? 'Sede da fazenda'}</Tooltip>
+            </Marker>
+          ) : null}
           <Pino temCoord={temCoord} center={center} onSelect={selecionar} />
           <Recentralizar center={center} />
         </MapContainer>
@@ -118,7 +146,9 @@ function MapaWeb({ latitude, longitude, onChange }: MapaProps) {
       <Text style={styles.confirma}>
         {temCoord
           ? `Local selecionado: ${lat.toFixed(5)}, ${lng.toFixed(5)}`
-          : 'Clique no mapa ou busque um endereço para marcar a fazenda.'}
+          : temReferencia
+            ? 'O pino amarelo é a sede da fazenda. Clique no mapa para marcar o ponto.'
+            : 'Clique no mapa ou busque um endereço para marcar a fazenda.'}
       </Text>
     </View>
   );

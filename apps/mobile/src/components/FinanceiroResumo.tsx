@@ -1,27 +1,71 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { type FiltroPeriodo } from '@/components/FiltrosPeriodo';
+import { buscarResumoFinanceiro, type ResumoFinanceiro } from '@/services/financeiro.service';
 import { colors, radius, shadows } from '@/theme/colors';
 
-export function FinanceiroResumo() {
+const FILTRO_PADRAO: FiltroPeriodo = { periodo: 'mes' };
+
+type FinanceiroResumoProps = {
+  /** Filtro a resumir (padrão: mês atual). */
+  filtro?: FiltroPeriodo;
+  /** Muda este valor para forçar o card a recarregar (ex.: após novo lançamento). */
+  refreshKey?: number;
+};
+
+export function FinanceiroResumo({ filtro = FILTRO_PADRAO, refreshKey = 0 }: FinanceiroResumoProps) {
+  const [resumo, setResumo] = useState<ResumoFinanceiro | null>(null);
+  // String estável para a dependência do efeito (evita refetch por nova referência).
+  const chaveFiltro = `${filtro.periodo}:${filtro.inicio ?? ''}:${filtro.fim ?? ''}`;
+
+  useEffect(() => {
+    let ativo = true;
+    setResumo(null);
+    buscarResumoFinanceiro(filtro).then((r) => {
+      if (ativo) setResumo(r);
+    });
+    return () => {
+      ativo = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chaveFiltro, refreshKey]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Resumo financeiro</Text>
-        <Text style={styles.periodo}>Maio · 2026</Text>
+        <Text style={styles.periodo}>{resumo?.mesLabel ?? '—'}</Text>
       </View>
 
-      <View style={styles.principal}>
-        <Text style={styles.principalLabel}>Lucro líquido do mês</Text>
-        <Text style={styles.principalValor}>R$ 184.520,00</Text>
-        <View style={styles.variacao}>
-          <Text style={styles.variacaoText}>▲ 12,4%</Text>
-          <Text style={styles.variacaoSub}>vs. abril</Text>
+      {!resumo ? (
+        <View style={styles.estado}>
+          <ActivityIndicator color={colors.primary} />
         </View>
-      </View>
+      ) : (
+        <>
+          <View style={styles.principal}>
+            <Text style={styles.principalLabel}>Lucro líquido do mês</Text>
+            <Text style={styles.principalValor}>{formatBrl(resumo.lucro)}</Text>
+            {resumo.variacaoLucro !== null ? (
+              <View style={styles.variacao}>
+                <Text style={styles.variacaoText}>
+                  {resumo.variacaoLucro >= 0 ? '▲' : '▼'} {Math.abs(resumo.variacaoLucro).toFixed(1)}%
+                </Text>
+                <Text style={styles.variacaoSub}>{resumo.comparacao}</Text>
+              </View>
+            ) : null}
+          </View>
 
-      <View style={styles.linhas}>
-        <Linha label="Receita" valor="R$ 412.000" cor={colors.success} />
-        <Linha label="Custos" valor="R$ 227.480" cor={colors.danger} />
-      </View>
+          <View style={styles.linhas}>
+            <Linha label="Receita" valor={formatBrl(resumo.receita)} cor={colors.success} />
+            <Linha label="Custos" valor={formatBrl(resumo.custos)} cor={colors.danger} />
+          </View>
+
+          {resumo.exemplo ? (
+            <Text style={styles.exemplo}>Dados de exemplo · adicione lançamentos para ver os reais</Text>
+          ) : null}
+        </>
+      )}
     </View>
   );
 }
@@ -36,6 +80,15 @@ function Linha({ label, valor, cor }: { label: string; valor: string; cor: strin
       <Text style={styles.linhaValor}>{valor}</Text>
     </View>
   );
+}
+
+function formatBrl(valor: number) {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 }
 
 const styles = StyleSheet.create({
@@ -53,13 +106,18 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
   },
   periodo: {
     color: colors.textMuted,
     fontSize: 13,
     fontWeight: '600',
+  },
+  estado: {
+    minHeight: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   principal: {
     backgroundColor: colors.primary,
@@ -74,8 +132,8 @@ const styles = StyleSheet.create({
   },
   principalValor: {
     color: colors.surface,
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 27,
+    fontWeight: '700',
   },
   variacao: {
     flexDirection: 'row',
@@ -122,5 +180,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 18,
     fontWeight: '800',
+  },
+  exemplo: {
+    color: colors.textSoft,
+    fontSize: 11,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });
