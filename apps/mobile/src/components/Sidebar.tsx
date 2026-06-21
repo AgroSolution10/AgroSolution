@@ -10,6 +10,7 @@ export type MenuItemId =
   | 'alertas'
   | 'financeiro'
   | 'talhoes'
+  | 'relatorios'
   | 'voz'
   | 'configuracoes';
 
@@ -17,15 +18,15 @@ type MenuItem = {
   id: MenuItemId;
   label: string;
   icon: FeatherName;
-  badge?: number;
 };
 
 const ITENS: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
   { id: 'radar', label: 'Radar de Mercado', icon: 'trending-up' },
-  { id: 'alertas', label: 'Alertas', icon: 'bell', badge: 3 },
+  { id: 'alertas', label: 'Alertas', icon: 'bell' },
   { id: 'financeiro', label: 'Financeiro', icon: 'dollar-sign' },
   { id: 'talhoes', label: 'Talhões', icon: 'map' },
+  { id: 'relatorios', label: 'Relatórios', icon: 'file-text' },
   { id: 'voz', label: 'Comando de Voz', icon: 'mic' },
   { id: 'configuracoes', label: 'Configurações', icon: 'settings' },
 ];
@@ -35,11 +36,13 @@ type SidebarProps = {
   onSelecionar: (id: MenuItemId) => void;
   onSair: () => void;
   usuario: { nome: string; email: string };
+  /** Contagens por item (ex.: { alertas: 3 }) — exibidas como badge. */
+  badges?: Partial<Record<MenuItemId, number>>;
   /** Quando passado, exibe um botão X no topo (modo drawer no mobile). */
   onFechar?: () => void;
 };
 
-export function Sidebar({ ativo, onSelecionar, onSair, usuario, onFechar }: SidebarProps) {
+export function Sidebar({ ativo, onSelecionar, onSair, usuario, badges, onFechar }: SidebarProps) {
   return (
     <View style={styles.container}>
       <View style={styles.brand}>
@@ -62,6 +65,7 @@ export function Sidebar({ ativo, onSelecionar, onSair, usuario, onFechar }: Side
       <ScrollView style={styles.menu} showsVerticalScrollIndicator={false}>
         {ITENS.map((item) => {
           const ativoFlag = item.id === ativo;
+          const badge = badges?.[item.id] ?? 0;
           return (
             <Pressable
               key={item.id}
@@ -79,9 +83,9 @@ export function Sidebar({ ativo, onSelecionar, onSair, usuario, onFechar }: Side
                 style={styles.icon}
               />
               <Text style={[styles.label, ativoFlag && styles.labelAtivo]}>{item.label}</Text>
-              {item.badge ? (
+              {badge > 0 ? (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.badge}</Text>
+                  <Text style={styles.badgeText}>{badge}</Text>
                 </View>
               ) : null}
             </Pressable>

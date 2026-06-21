@@ -1,45 +1,52 @@
-import { useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
-import Svg, {
-  Circle,
-  Defs,
-  LinearGradient,
-  Path,
-  Stop,
-} from 'react-native-svg';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { buscarProjecaoCaixa, type ProjecaoCaixaData } from '@/services/financeiro.service';
 import { colors, radius, shadows } from '@/theme/colors';
-
-// Saldo projetado (R$ mil) ao longo dos próximos 30 dias — dados mockados.
-const SERIE = [27.8, 29, 28.6, 18, 15.2, 15, 16.1, 15.4];
 
 const ALTURA = 180;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 16;
 const PAD_X = 6;
 
-export function ProjecaoCaixa() {
+type ProjecaoCaixaProps = {
+  /** Muda este valor para recarregar (ex.: após novo lançamento). */
+  refreshKey?: number;
+};
+
+export function ProjecaoCaixa({ refreshKey = 0 }: ProjecaoCaixaProps) {
   const [largura, setLargura] = useState(0);
+  const [dados, setDados] = useState<ProjecaoCaixaData | null>(null);
+
+  useEffect(() => {
+    let ativo = true;
+    setDados(null);
+    buscarProjecaoCaixa().then((d) => {
+      if (ativo) setDados(d);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [refreshKey]);
 
   function aoMedir(e: LayoutChangeEvent) {
     setLargura(e.nativeEvent.layout.width);
   }
 
-  const max = Math.max(...SERIE);
-  const min = Math.min(...SERIE);
+  const serie = dados?.serie ?? [];
+  const max = Math.max(...serie, 0);
+  const min = Math.min(...serie, 0);
   const span = max - min || 1;
   const chartH = ALTURA - PAD_TOP - PAD_BOTTOM;
   const larguraUtil = Math.max(largura - PAD_X * 2, 0);
 
-  const px = (i: number) => PAD_X + (larguraUtil / (SERIE.length - 1)) * i;
+  const px = (i: number) => PAD_X + (larguraUtil / Math.max(serie.length - 1, 1)) * i;
   const py = (v: number) => PAD_TOP + chartH - ((v - min) / span) * chartH;
 
-  // Caminho da linha + área preenchida até a base.
-  const linha = SERIE.map((v, i) => `${i === 0 ? 'M' : 'L'} ${px(i)} ${py(v)}`).join(' ');
-  const area = `${linha} L ${px(SERIE.length - 1)} ${ALTURA - PAD_BOTTOM} L ${px(0)} ${
+  const linha = serie.map((v, i) => `${i === 0 ? 'M' : 'L'} ${px(i)} ${py(v)}`).join(' ');
+  const area = `${linha} L ${px(serie.length - 1)} ${ALTURA - PAD_BOTTOM} L ${px(0)} ${
     ALTURA - PAD_BOTTOM
   } Z`;
-
-  const ultimo = SERIE[SERIE.length - 1];
 
   return (
     <View style={styles.container}>
@@ -53,44 +60,68 @@ export function ProjecaoCaixa() {
         </View>
       </View>
 
-      <View onLayout={aoMedir} style={styles.chartWrap}>
-        {largura > 0 && (
-          <Svg width={largura} height={ALTURA}>
-            <Defs>
-              <LinearGradient id="gradCaixa" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={colors.primary} stopOpacity={0.18} />
-                <Stop offset="1" stopColor={colors.primary} stopOpacity={0} />
-              </LinearGradient>
-            </Defs>
+      {!dados ? (
+        <View style={[styles.chartWrap, styles.centro]}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : (
+        <>
+          <View onLayout={aoMedir} style={styles.chartWrap}>
+            {largura > 0 && serie.length > 1 && (
+              <Svg width={largura} height={ALTURA}>
+                <Defs>
+                  <LinearGradient id="gradCaixa" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor={colors.primary} stopOpacity={0.18} />
+                    <Stop offset="1" stopColor={colors.primary} stopOpacity={0} />
+                  </LinearGradient>
+                </Defs>
 
-            <Path d={area} fill="url(#gradCaixa)" />
-            <Path
-              d={linha}
-              fill="none"
-              stroke={colors.primary}
-              strokeWidth={2.5}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-            {/* Ponto final destacado */}
-            <Circle cx={px(SERIE.length - 1)} cy={py(ultimo)} r={4} fill={colors.primary} />
-            <Circle
-              cx={px(SERIE.length - 1)}
-              cy={py(ultimo)}
-              r={8}
-              fill={colors.primary}
-              fillOpacity={0.15}
-            />
-          </Svg>
-        )}
-      </View>
+                <Path d={area} fill="url(#gradCaixa)" />
+                <Path
+                  d={linha}
+                  fill="none"
+                  stroke={colors.primary}
+                  strokeWidth={2.5}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                <Circle cx={px(serie.length - 1)} cy={py(serie[serie.length - 1])} r={4} fill={colors.primary} />
+                <Circle
+                  cx={px(serie.length - 1)}
+                  cy={py(serie[serie.length - 1])}
+                  r={8}
+                  fill={colors.primary}
+                  fillOpacity={0.15}
+                />
+              </Svg>
+            )}
+          </View>
 
-      <View style={styles.rodape}>
-        <Text style={styles.rodapeLabel}>Saldo projetado em 30 dias</Text>
-        <Text style={styles.rodapeValor}>R$ {ultimo.toFixed(1).replace('.', ',')} mil</Text>
-      </View>
+          <View style={styles.rodape}>
+            <Text style={styles.rodapeLabel}>Saldo projetado em 30 dias</Text>
+            <Text style={styles.rodapeValor}>{formatBrl(dados.saldoFinal)}</Text>
+          </View>
+
+          {dados.exemplo ? (
+            <Text style={styles.aviso}>Dados de exemplo · adicione lançamentos para projetar o real</Text>
+          ) : !dados.temFuturos ? (
+            <Text style={styles.aviso}>
+              Sem lançamentos com data futura — projeção mantém o saldo atual.
+            </Text>
+          ) : null}
+        </>
+      )}
     </View>
   );
+}
+
+function formatBrl(valor: number) {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 }
 
 const styles = StyleSheet.create({
@@ -108,8 +139,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
   },
   subtitle: {
     color: colors.textMuted,
@@ -131,6 +162,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: ALTURA,
   },
+  centro: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   rodape: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -148,5 +183,11 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 16,
     fontWeight: '800',
+  },
+  aviso: {
+    color: colors.textSoft,
+    fontSize: 11,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });

@@ -1,35 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { G, Line, Rect, Text as SvgText } from 'react-native-svg';
+import { buscarEvolucao, type PontoEvolucao } from '@/services/financeiro.service';
 import { colors, radius, shadows } from '@/theme/colors';
-
-type Ponto = { mes: string; receita: number; despesa: number };
-
-// Dados mockados — últimos 6 meses. Substituir pelo serviço financeiro depois.
-const DADOS: Ponto[] = [
-  { mes: 'Dez', receita: 38000, despesa: 22000 },
-  { mes: 'Jan', receita: 45000, despesa: 28000 },
-  { mes: 'Fev', receita: 41000, despesa: 31000 },
-  { mes: 'Mar', receita: 60000, despesa: 35000 },
-  { mes: 'Abr', receita: 67000, despesa: 39000 },
-  { mes: 'Mai', receita: 52000, despesa: 41000 },
-];
 
 const ALTURA = 200;
 const PAD_TOP = 12;
 const PAD_BOTTOM = 26;
 const N_LINHAS = 4;
 
-export function EvolucaoFinanceira() {
+type EvolucaoFinanceiraProps = {
+  /** Muda este valor para forçar o gráfico a recarregar (ex.: após novo lançamento). */
+  refreshKey?: number;
+};
+
+export function EvolucaoFinanceira({ refreshKey = 0 }: EvolucaoFinanceiraProps) {
   const [largura, setLargura] = useState(0);
+  const [dados, setDados] = useState<PontoEvolucao[]>([]);
+
+  useEffect(() => {
+    let ativo = true;
+    buscarEvolucao().then((d) => {
+      if (ativo) setDados(d);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [refreshKey]);
 
   function aoMedir(e: LayoutChangeEvent) {
     setLargura(e.nativeEvent.layout.width);
   }
 
-  const max = Math.max(...DADOS.flatMap((d) => [d.receita, d.despesa]));
+  // Evita divisão por zero antes dos dados chegarem.
+  const max = Math.max(1, ...dados.flatMap((d) => [d.receita, d.despesa]));
   const chartH = ALTURA - PAD_TOP - PAD_BOTTOM;
-  const slot = largura / DADOS.length;
+  const slot = dados.length > 0 ? largura / dados.length : largura;
   const barW = Math.min(16, slot / 3.2);
   const escala = (v: number) => (v / max) * chartH;
 
@@ -43,7 +49,7 @@ export function EvolucaoFinanceira() {
       </View>
 
       <View onLayout={aoMedir} style={styles.chartWrap}>
-        {largura > 0 && (
+        {largura > 0 && dados.length > 0 && (
           <Svg width={largura} height={ALTURA}>
             {/* Linhas de grade horizontais */}
             <G>
@@ -64,7 +70,7 @@ export function EvolucaoFinanceira() {
             </G>
 
             {/* Barras agrupadas (receita / despesa) */}
-            {DADOS.map((d, i) => {
+            {dados.map((d, i) => {
               const centro = slot * i + slot / 2;
               const hRec = escala(d.receita);
               const hDes = escala(d.despesa);
@@ -134,8 +140,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
   },
   subtitle: {
     color: colors.textMuted,

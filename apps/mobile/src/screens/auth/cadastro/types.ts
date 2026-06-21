@@ -30,4 +30,9 @@ export type Usuario = {
   email: string;
   culturas: Cultura[];
   areaTotal?: string;
+  /** Id da 1ª fazenda do usuário — necessário para editar a localização. */
+  fazendaId?: string;
+  /** Coordenada da fazenda — usada nos alertas de clima. */
+  latitude?: number;
+  longitude?: number;
 };

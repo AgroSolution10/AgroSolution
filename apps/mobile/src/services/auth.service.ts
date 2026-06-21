@@ -103,12 +103,17 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
 
   if (culturas.length > 0 && Number.isFinite(areaTotal) && areaTotal > 0) {
     const fazendaId = gerarUuid();
+    const latitude = parseFloat((dados.latitude ?? '').replace(',', '.'));
+    const longitude = parseFloat((dados.longitude ?? '').replace(',', '.'));
 
     const { error: erroFazenda } = await supabase.from('fazenda').insert({
       id: fazendaId,
       nome: `Fazenda de ${nome.split(' ')[0]}`,
       area_total_ha: areaTotal,
       cultura_principal: culturas[0],
+      // Coordenada (quando informada no mapa do cadastro) — alimenta o clima.
+      latitude: Number.isFinite(latitude) ? latitude : null,
+      longitude: Number.isFinite(longitude) ? longitude : null,
     });
 
     if (erroFazenda) throw new Error(traduzirErro(erroFazenda.message));
@@ -175,15 +180,30 @@ async function carregarUsuario(userId: string): Promise<Usuario> {
   if (error) throw new Error(traduzirErro(error.message));
   if (!usuario) throw new Error('Perfil de usuário não encontrado.');
 
-  // Pega a 1ª fazenda associada
-  const { data: vinculos } = await supabase
+  // Pega a 1ª fazenda associada. Se este SELECT falhar (ex.: coluna ausente por
+  // migration pendente), logamos e seguimos sem fazenda — não derruba o login.
+  const { data: vinculos, error: erroVinculo } = await supabase
     .from('usuario_fazenda')
-    .select('fazenda:fazenda_id(area_total_ha, cultura_principal)')
+    .select('fazenda_id, fazenda:fazenda_id(area_total_ha, cultura_principal, latitude, longitude)')
     .eq('usuario_id', userId)
     .limit(1);
 
-  const fazenda = (vinculos?.[0] as { fazenda: { area_total_ha?: number; cultura_principal?: string } | null } | undefined)
-    ?.fazenda;
+  if (erroVinculo) {
+    console.warn('[auth] não foi possível carregar a fazenda do usuário:', erroVinculo);
+  }
+
+  const vinculo = vinculos?.[0] as
+    | {
+        fazenda_id?: string;
+        fazenda: {
+          area_total_ha?: number;
+          cultura_principal?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+        } | null;
+      }
+    | undefined;
+  const fazenda = vinculo?.fazenda;
   const cultura = fazenda?.cultura_principal as Cultura | undefined;
 
   return {
@@ -191,7 +211,24 @@ async function carregarUsuario(userId: string): Promise<Usuario> {
     email: usuario.email,
     culturas: cultura ? [cultura] : [],
     areaTotal: fazenda?.area_total_ha?.toString(),
+    fazendaId: vinculo?.fazenda_id,
+    latitude: fazenda?.latitude ?? undefined,
+    longitude: fazenda?.longitude ?? undefined,
   };
+}
+
+/** Atualiza a coordenada da fazenda (editor de localização em Configurações). */
+export async function atualizarLocalizacao(
+  fazendaId: string,
+  latitude: number,
+  longitude: number,
+): Promise<void> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase
+    .from('fazenda')
+    .update({ latitude, longitude })
+    .eq('id', fazendaId);
+  if (error) throw new Error(traduzirErro(error.message));
 }
 
 /** Traduz mensagens comuns do Supabase pra português. */
