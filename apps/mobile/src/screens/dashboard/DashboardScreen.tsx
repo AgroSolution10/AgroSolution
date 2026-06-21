@@ -145,7 +145,7 @@ function PaginaAtiva({
     case 'relatorios':
       return <RelatoriosScreen desktop={desktop} usuario={usuario} />;
     case 'voz':
-      return <VozScreen desktop={desktop} />;
+      return <VozScreen desktop={desktop} usuario={usuario} />;
     case 'configuracoes':
       return (
         <ConfiguracoesScreen
