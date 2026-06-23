@@ -61,8 +61,8 @@ export function FinanceiroResumo({ filtro = FILTRO_PADRAO, refreshKey = 0 }: Fin
             <Linha label="Custos" valor={formatBrl(resumo.custos)} cor={colors.danger} />
           </View>
 
-          {resumo.exemplo ? (
-            <Text style={styles.exemplo}>Dados de exemplo · adicione lançamentos para ver os reais</Text>
+          {resumo.receita === 0 && resumo.custos === 0 ? (
+            <Text style={styles.exemplo}>Sem lançamentos neste período · adicione para ver seus números</Text>
           ) : null}
         </>
       )}

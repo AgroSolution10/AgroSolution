@@ -102,9 +102,7 @@ export function ProjecaoCaixa({ refreshKey = 0 }: ProjecaoCaixaProps) {
             <Text style={styles.rodapeValor}>{formatBrl(dados.saldoFinal)}</Text>
           </View>
 
-          {dados.exemplo ? (
-            <Text style={styles.aviso}>Dados de exemplo · adicione lançamentos para projetar o real</Text>
-          ) : !dados.temFuturos ? (
+          {!dados.temFuturos ? (
             <Text style={styles.aviso}>
               Sem lançamentos com data futura — projeção mantém o saldo atual.
             </Text>

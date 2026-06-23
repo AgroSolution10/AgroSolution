@@ -89,8 +89,10 @@ async function responderCotacao(id: string): Promise<string> {
 
 async function responderFinanceiro(): Promise<string> {
   const r = await buscarResumoFinanceiro();
-  const base = `Seu lucro em ${r.mesLabel} é ${brl(r.lucro)} — receita de ${brl(r.receita)} e custos de ${brl(r.custos)}.`;
-  return r.exemplo ? `${base} (são dados de exemplo até você lançar movimentações)` : base;
+  if (r.receita === 0 && r.custos === 0) {
+    return 'Você ainda não tem lançamentos neste período. Adicione receitas e custos no Financeiro para acompanhar o resultado.';
+  }
+  return `Seu lucro em ${r.mesLabel} é ${brl(r.lucro)} — receita de ${brl(r.receita)} e custos de ${brl(r.custos)}.`;
 }
 
 async function responderClima(coords?: Coordenada): Promise<string> {

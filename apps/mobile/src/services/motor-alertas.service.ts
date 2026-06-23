@@ -44,8 +44,8 @@ type SinaisFinanceiro = {
   saldoProjetado: number;
   /** Compra recente de defensivo/veneno (para a regra combinada com chuva). */
   defensivoRecente: { descricao: string; valor: number } | null;
-  /** true quando os números financeiros são exemplo (sem dados reais). */
-  exemplo: boolean;
+  /** true quando há lançamentos reais (sem eles, não geramos alertas financeiros). */
+  temDados: boolean;
 };
 
 export type Sinais = {
@@ -105,7 +105,7 @@ export async function coletarSinais(coords?: Coordenada): Promise<Sinais> {
       defensivoRecente: compra
         ? { descricao: compra.descricao || 'um defensivo', valor: compra.valor }
         : null,
-      exemplo: resumo.exemplo || projecao.exemplo,
+      temDados: lancamentos.length > 0,
     },
     clima,
   };
@@ -145,7 +145,7 @@ export function gerarAlertas(sinais: Sinais): AlertaGerado[] {
 
   // ---- Regras de financeiro (só com dados reais) ----
   const f = sinais.financeiro;
-  if (!f.exemplo) {
+  if (f.temDados) {
     if (f.lucro < 0) {
       alertas.push({
         id: 'fin-vermelho',

@@ -101,10 +101,19 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
   const culturas = (dados.culturas ?? []) as Cultura[];
   const areaTotal = parseFloat((dados.areaTotal ?? '').replace(',', '.'));
 
+  // Preenchidos abaixo quando a fazenda é criada — vão para o Usuario retornado
+  // para que a sessão recém-criada já "enxergue" a fazenda (Configurações,
+  // localização, rateio de talhões etc.) sem precisar relogar.
+  let fazendaId: string | undefined;
+  let latitudeFazenda: number | undefined;
+  let longitudeFazenda: number | undefined;
+
   if (culturas.length > 0 && Number.isFinite(areaTotal) && areaTotal > 0) {
-    const fazendaId = gerarUuid();
+    fazendaId = gerarUuid();
     const latitude = parseFloat((dados.latitude ?? '').replace(',', '.'));
     const longitude = parseFloat((dados.longitude ?? '').replace(',', '.'));
+    latitudeFazenda = Number.isFinite(latitude) ? latitude : undefined;
+    longitudeFazenda = Number.isFinite(longitude) ? longitude : undefined;
 
     const { error: erroFazenda } = await supabase.from('fazenda').insert({
       id: fazendaId,
@@ -112,8 +121,8 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
       area_total_ha: areaTotal,
       cultura_principal: culturas[0],
       // Coordenada (quando informada no mapa do cadastro) — alimenta o clima.
-      latitude: Number.isFinite(latitude) ? latitude : null,
-      longitude: Number.isFinite(longitude) ? longitude : null,
+      latitude: latitudeFazenda ?? null,
+      longitude: longitudeFazenda ?? null,
     });
 
     if (erroFazenda) throw new Error(traduzirErro(erroFazenda.message));
@@ -132,6 +141,9 @@ export async function cadastrarUsuario(dados: CadastroDados): Promise<Usuario> {
     email,
     culturas,
     areaTotal: dados.areaTotal,
+    fazendaId,
+    latitude: latitudeFazenda,
+    longitude: longitudeFazenda,
   };
 }
 

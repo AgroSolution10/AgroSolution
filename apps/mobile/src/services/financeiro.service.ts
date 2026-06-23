@@ -3,9 +3,9 @@
  * que o módulo Financeiro mostra: resumo do mês e evolução dos últimos 6 meses.
  *
  * Mesma filosofia do serviço de cotações: a UI nunca calcula nem consulta o
- * banco direto. Se o Supabase não estiver configurado, a tabela não existir ou
- * o usuário ainda não tiver lançamentos, devolve um exemplo (fallback) para o
- * painel não ficar zerado — vira real assim que houver dados.
+ * banco direto. Diferente do radar de commodities, aqui NÃO há dados de
+ * exemplo: se o usuário ainda não tiver lançamentos, os números vêm zerados —
+ * o financeiro reflete apenas o que ele de fato lançou.
  *
  * Ver migration docs/sql/06_lancamento_financeiro.sql.
  */
@@ -25,8 +25,6 @@ export type ResumoFinanceiro = {
   variacaoLucro: number | null;
   /** Texto da comparação (ex.: "vs. mês anterior", "vs. ano anterior"). */
   comparacao: string;
-  /** true quando os números são exemplo (sem lançamentos no banco). */
-  exemplo: boolean;
 };
 
 export type PontoEvolucao = { mes: string; receita: number; despesa: number };
@@ -73,33 +71,13 @@ type LinhaLancamento = {
   data: string;
 };
 
-// ---- Fallbacks (mesmos valores de exemplo que estavam chumbados na UI) ----
-
-const RESUMO_FALLBACK: ResumoFinanceiro = {
-  mesLabel: rotuloMesAtual(),
-  receita: 412000,
-  custos: 227480,
-  lucro: 184520,
-  variacaoLucro: 12.4,
-  comparacao: 'vs. mês anterior',
-  exemplo: true,
-};
-
-const EVOLUCAO_FALLBACK: PontoEvolucao[] = [
-  { mes: 'Dez', receita: 38000, despesa: 22000 },
-  { mes: 'Jan', receita: 45000, despesa: 28000 },
-  { mes: 'Fev', receita: 41000, despesa: 31000 },
-  { mes: 'Mar', receita: 60000, despesa: 35000 },
-  { mes: 'Abr', receita: 67000, despesa: 39000 },
-  { mes: 'Mai', receita: 52000, despesa: 41000 },
-];
-
 /**
  * Lê os lançamentos do usuário logado (a RLS já filtra por auth.uid()).
- * Devolve null quando não há como buscar — quem chama decide o fallback.
+ * Devolve lista vazia quando não há como buscar ou ainda não há lançamentos —
+ * o financeiro sempre reflete dados reais (sem exemplo).
  */
-async function buscarLancamentos(): Promise<LinhaLancamento[] | null> {
-  if (!supabase) return null;
+async function buscarLancamentos(): Promise<LinhaLancamento[]> {
+  if (!supabase) return [];
   try {
     const { data, error } = await supabase.from('lancamento').select('tipo, valor, data');
     if (error) throw error;
@@ -115,8 +93,8 @@ async function buscarLancamentos(): Promise<LinhaLancamento[] | null> {
       };
     });
   } catch (erro) {
-    console.warn('[financeiro] falha ao ler lançamentos, usando exemplo:', erro);
-    return null;
+    console.warn('[financeiro] falha ao ler lançamentos:', erro);
+    return [];
   }
 }
 
@@ -245,10 +223,6 @@ export async function buscarResumoFinanceiro(
   const range = rangeDoFiltro(filtro, new Date());
   const lancamentos = await buscarLancamentos();
 
-  if (!lancamentos || lancamentos.length === 0) {
-    return { ...RESUMO_FALLBACK, mesLabel: range.label, comparacao: range.comparacao };
-  }
-
   const receita = somaIntervalo(lancamentos, range.inicio, range.fim, 'receita');
   const custos = somaIntervalo(lancamentos, range.inicio, range.fim, 'despesa');
   const lucro = receita - custos;
@@ -266,14 +240,12 @@ export async function buscarResumoFinanceiro(
     lucro,
     variacaoLucro,
     comparacao: range.comparacao,
-    exemplo: false,
   };
 }
 
 /** Série dos últimos 6 meses (receita x despesa) para o gráfico de evolução. */
 export async function buscarEvolucao(): Promise<PontoEvolucao[]> {
   const lancamentos = await buscarLancamentos();
-  if (!lancamentos || lancamentos.length === 0) return EVOLUCAO_FALLBACK;
 
   const hoje = new Date();
   const pontos: PontoEvolucao[] = [];
@@ -292,11 +264,6 @@ export async function buscarEvolucao(): Promise<PontoEvolucao[]> {
   return pontos;
 }
 
-function rotuloMesAtual() {
-  const hoje = new Date();
-  return `${MESES[hoje.getMonth()]} · ${hoje.getFullYear()}`;
-}
-
 // 'YYYY-MM-DD' a partir de uma Date (componentes locais, sem fuso UTC).
 function ymd(d: Date): string {
   const mes = String(d.getMonth() + 1).padStart(2, '0');
@@ -313,16 +280,6 @@ export type ProjecaoCaixaData = {
   saldoFinal: number;
   /** Há lançamentos com data futura dentro da janela? */
   temFuturos: boolean;
-  /** true quando é exemplo (sem lançamentos no banco). */
-  exemplo: boolean;
-};
-
-const PROJECAO_FALLBACK: ProjecaoCaixaData = {
-  serie: [27800, 29000, 28600, 18000, 15200, 15000, 16100, 15400],
-  saldoAtual: 27800,
-  saldoFinal: 15400,
-  temFuturos: false,
-  exemplo: true,
 };
 
 /**
@@ -332,7 +289,6 @@ const PROJECAO_FALLBACK: ProjecaoCaixaData = {
  */
 export async function buscarProjecaoCaixa(): Promise<ProjecaoCaixaData> {
   const lancamentos = await buscarLancamentos();
-  if (!lancamentos || lancamentos.length === 0) return PROJECAO_FALLBACK;
 
   const hoje = new Date();
   const hojeStr = ymd(hoje);
@@ -360,7 +316,7 @@ export async function buscarProjecaoCaixa(): Promise<ProjecaoCaixaData> {
     serie.push(saldo);
   }
 
-  return { serie, saldoAtual, saldoFinal: saldo, temFuturos, exemplo: false };
+  return { serie, saldoAtual, saldoFinal: saldo, temFuturos };
 }
 
 /**
